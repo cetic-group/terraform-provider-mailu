@@ -1,0 +1,41 @@
+# Terraform local state and runtime files
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfvars
+*.tfvars.json
+
+# Local provider builds and release artifacts
+/terraform-provider-mailu
+/terraform-provider-mailu_*
+/bin/
+/dist/
+
+# Go test/build artifacts
+*.test
+*.out
+coverage.*
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+*.env
+!*.env.example
+
+# Local CLI config
+.terraformrc
+terraform.rc
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
