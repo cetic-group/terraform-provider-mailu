@@ -2,7 +2,7 @@
 
 Reads a Mailu domain.
 
-Status: confirmed by Swagger; not implemented yet.
+Status: MVP schema frozen; not implemented yet.
 
 ## Example Usage
 
@@ -22,12 +22,12 @@ data "mailu_domain" "example" {
 
 - `id` (String) Domain identifier.
 - `comment` (String) Domain comment.
-- `managers` (List of String) Domain managers.
+- `managers` (Set of String) Domain managers.
 - `max_users` (Number) Maximum number of users.
 - `max_aliases` (Number) Maximum number of aliases.
 - `max_quota_bytes` (Number) Maximum mailbox quota in bytes.
 - `signup_enabled` (Boolean) Whether signup is enabled.
-- `alternatives` (List of String) Alternative domain names.
+- `alternatives` (Set of String) Alternative domain names.
 - `dns_autoconfig` (List of String) Autoconfiguration DNS records.
 - `dns_mx` (String) MX DNS value.
 - `dns_spf` (String) SPF DNS value.

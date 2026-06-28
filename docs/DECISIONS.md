@@ -74,6 +74,34 @@ Expose `raw_password` as sensitive write input and do not expose `UserGet.passwo
 
 Reason: Mailu uses `raw_password` for writes and returns `UserGet.password` as a string hash. The provider must not compare the raw password with the returned hash and must redact the hash from diagnostics/logs.
 
+### MVP Terraform IDs
+
+Use natural identifiers for MVP resources:
+
+- `mailu_domain`: normalized domain name.
+- `mailu_user`: normalized full email address.
+- `mailu_alias`: normalized full alias email address.
+
+Reason: Mailu API paths use these identifiers directly, and they are stable/importable for the MVP.
+
+### Normalization
+
+Normalize domain names and email addresses by trimming whitespace and lowercasing before storing IDs or sending API paths.
+
+Reason: Mailu treats these objects as identity values and may normalize them in responses. Terraform must avoid drift caused only by casing or whitespace.
+
+### MVP Drift Behavior
+
+Compare configured mutable fields with Mailu read responses. Treat DNS values, domain managers, and quota usage as computed read-only fields.
+
+Reason: these values are either managed by Mailu or operational state and should not trigger updates.
+
+### Acceptance Test Fixtures
+
+Acceptance tests must create only temporary domains matching `tf-acc-*.<MAILU_ACC_DOMAIN>` and clean up aliases before users before domains.
+
+Reason: runtime validation confirmed hard delete behavior, so tests must avoid production objects and verify cleanup with `404` reads after deletion.
+
 ## Open
 
 ### DNS Ownership

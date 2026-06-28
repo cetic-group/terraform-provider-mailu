@@ -1,6 +1,8 @@
 # Resource Model
 
-This document describes the intended Terraform model for the `cetic-group/mailu` provider.
+This document freezes the MVP Terraform model for the `cetic-group/mailu` provider.
+
+Status: MVP design frozen.
 
 Resource modeling decisions require architecture, QA, and security review. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -13,42 +15,54 @@ provider "mailu" {
 }
 ```
 
-Attributes:
+| Attribute | Kind | Notes |
+| --- | --- | --- |
+| `endpoint` | optional | Mailu API base URL. Can be set with `MAILU_ENDPOINT`. |
+| `token` | optional, sensitive | Mailu API token. Can be set with `MAILU_API_TOKEN`. |
 
-- `endpoint`: Mailu API base URL.
-- `token`: sensitive API token.
+## Common Rules
 
-Environment variables:
+Normalization:
 
-- `MAILU_ENDPOINT`
-- `MAILU_API_TOKEN`
+- Domain names are normalized to lowercase and trimmed.
+- Email addresses are normalized to lowercase and trimmed.
+- List/set attributes containing email addresses or domains are normalized item-by-item.
+
+Terraform IDs:
+
+- Use stable natural identifiers.
+- Domain ID: domain name.
+- User ID: full email address.
+- Alias ID: full alias email address.
+
+Delete behavior:
+
+- MVP resources map Terraform delete to Mailu `DELETE`.
+- Runtime validation confirmed hard delete behavior for domains, users, and aliases.
+- Reads after delete return `404`.
+
+Drift behavior:
+
+- Managed mutable fields are compared against Mailu read responses.
+- Computed DNS and usage fields are refreshed from Mailu and do not force updates.
+- API-returned password hashes are ignored and never compared with `raw_password`.
+
+Sensitive handling:
+
+- `token` and `raw_password` are sensitive.
+- `UserGet.password` is a hash returned by Mailu and must not be exposed as a Terraform attribute.
+- Diagnostics and logs must redact tokens, raw passwords, generated token values, and password hashes.
 
 ## `mailu_domain`
 
-Status: confirmed by Swagger and runtime validation for MVP.
+Status: MVP schema frozen.
 
 Represents a Mailu domain.
 
-Confirmed attributes:
+Endpoint mapping:
 
-- `name`: domain name, required, force replacement if Mailu cannot rename domains.
-- `comment`: optional.
-- `max_users`: optional.
-- `max_aliases`: optional.
-- `max_quota_bytes`: optional.
-- `signup_enabled`: optional.
-- `alternatives`: optional list of alternative domain names.
-
-Computed attributes:
-
-- `managers`
-- `dns_autoconfig`
-- `dns_mx`
-- `dns_spf`
-- `dns_dkim`
-- `dns_dmarc`
-- `dns_dmarc_report`
-- `dns_tlsa`
+- Create/list: `POST /domain`, `GET /domain`
+- Read/update/delete: `GET /domain/{domain}`, `PATCH /domain/{domain}`, `DELETE /domain/{domain}`
 
 Import ID:
 
@@ -56,40 +70,38 @@ Import ID:
 example.com
 ```
 
+Schema:
+
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | Same as normalized `name`. |
+| `name` | required | yes | Domain name. Mailu does not expose rename. |
+| `comment` | optional | no | Domain comment. |
+| `max_users` | optional | no | Maximum users, Mailu default may be `-1`. |
+| `max_aliases` | optional | no | Maximum aliases, Mailu default may be `-1`. |
+| `max_quota_bytes` | optional | no | Maximum mailbox quota in bytes. |
+| `signup_enabled` | optional | no | Whether signup is enabled. |
+| `alternatives` | optional | no | Set of alternative domain names. |
+| `managers` | computed | no | Domain managers. |
+| `dns_autoconfig` | computed | no | Autoconfiguration DNS records. |
+| `dns_mx` | computed | no | MX DNS value. |
+| `dns_spf` | computed | no | SPF DNS value. |
+| `dns_dkim` | computed | no | DKIM DNS value. |
+| `dns_dmarc` | computed | no | DMARC DNS value. |
+| `dns_dmarc_report` | computed | no | DMARC report DNS value. |
+| `dns_tlsa` | computed | no | TLSA DNS values. |
+
 ## `mailu_user`
 
-Status: confirmed by Swagger and runtime validation for MVP.
+Status: MVP schema frozen.
 
 Represents a mailbox user.
 
-Confirmed attributes:
+Endpoint mapping:
 
-- `email`: required, force replacement if Mailu cannot rename users.
-- `raw_password`: required on create, optional on update, sensitive, write-only.
-- `comment`: optional.
-- `quota_bytes`: optional.
-- `enabled`: optional, default `true`.
-- `global_admin`: optional, default `false`.
-- `change_pw_next_login`: optional.
-- `enable_imap`: optional.
-- `enable_pop`: optional.
-- `allow_spoofing`: optional.
-- `forward_enabled`: optional.
-- `forward_destination`: optional list of email addresses.
-- `forward_keep`: optional.
-- `reply_enabled`: optional.
-- `reply_subject`: optional.
-- `reply_body`: optional.
-- `reply_startdate`: optional date string.
-- `reply_enddate`: optional date string.
-- `displayed_name`: optional.
-- `spam_enabled`: optional.
-- `spam_mark_as_read`: optional.
-- `spam_threshold`: optional.
-
-Computed attributes:
-
-- `quota_bytes_used`
+- Create/list: `POST /user`, `GET /user`
+- Read/update/delete: `GET /user/{email}`, `PATCH /user/{email}`, `DELETE /user/{email}`
+- Domain listing: `GET /domain/{domain}/users`
 
 Import ID:
 
@@ -97,18 +109,52 @@ Import ID:
 user@example.com
 ```
 
+Schema:
+
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | Same as normalized `email`. |
+| `email` | required | yes | Full email address. Mailu does not expose rename. |
+| `raw_password` | required on create, optional on update, sensitive | no | Write-only input mapped to Mailu `raw_password`. |
+| `comment` | optional | no | User comment. |
+| `quota_bytes` | optional | no | Mailbox quota in bytes. |
+| `quota_bytes_used` | computed | no | Used quota in bytes. |
+| `global_admin` | optional | no | Whether the user is a global Mailu admin. |
+| `enabled` | optional | no | Whether the user is enabled. |
+| `change_pw_next_login` | optional | no | Force password change at next login. |
+| `enable_imap` | optional | no | Allow IMAP access. |
+| `enable_pop` | optional | no | Allow POP3 access. |
+| `allow_spoofing` | optional | no | Allow sender spoofing. |
+| `forward_enabled` | optional | no | Enable forwarding. |
+| `forward_destination` | optional | no | Set of forward destination email addresses. |
+| `forward_keep` | optional | no | Keep a copy when forwarding. |
+| `reply_enabled` | optional | no | Enable automatic replies. |
+| `reply_subject` | optional | no | Automatic reply subject. |
+| `reply_body` | optional, sensitive | no | Automatic reply body can contain personal data. |
+| `reply_startdate` | optional | no | Date string in `YYYY-MM-DD` format. |
+| `reply_enddate` | optional | no | Date string in `YYYY-MM-DD` format. |
+| `displayed_name` | optional | no | Display name. |
+| `spam_enabled` | optional | no | Enable spam filtering. |
+| `spam_mark_as_read` | optional | no | Mark spam as read. |
+| `spam_threshold` | optional | no | Spam threshold. |
+
+Password update behavior:
+
+- Setting or changing `raw_password` sends `raw_password` in `PATCH /user/{email}`.
+- `raw_password` is never read back from Mailu.
+- The API-returned `password` hash is ignored and not stored as a normal schema field.
+
 ## `mailu_alias`
 
-Status: confirmed by Swagger and runtime validation for MVP.
+Status: MVP schema frozen.
 
 Represents a Mailu alias.
 
-Confirmed attributes:
+Endpoint mapping:
 
-- `email`: required.
-- `destination`: optional list/set of destination email addresses.
-- `comment`: optional.
-- `wildcard`: optional.
+- Create/list: `POST /alias`, `GET /alias`
+- Read/update/delete: `GET /alias/{alias}`, `PATCH /alias/{alias}`, `DELETE /alias/{alias}`
+- Domain filter: `GET /alias/destination/{domain}`
 
 Import ID:
 
@@ -116,18 +162,45 @@ Import ID:
 alias@example.com
 ```
 
-## Password Handling
+Schema:
 
-`raw_password` must be treated as sensitive write-only input. Mailu returns `UserGet.password`, which is a password hash. The provider must not expose this hash as a normal attribute and must not compare it with `raw_password`.
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | Same as normalized `email`. |
+| `email` | required | yes | Full alias email address. Mailu does not expose rename. |
+| `destination` | optional | no | Set of destination email addresses. |
+| `comment` | optional | no | Alias comment. |
+| `wildcard` | optional | no | Enable SQL LIKE wildcard syntax. |
 
-## Delete Policy
+## Data Sources
 
-Swagger exposes `DELETE` endpoints for domains, users, aliases, alternative domains, domain managers, relays, and tokens. Runtime validation confirmed hard delete behavior for domains, users, and aliases: reads after delete return `404`. If CETIC Group prefers safer production behavior later, the provider can add a provider-level option such as `delete_strategy = "delete"` or `delete_strategy = "disable"` after validating Mailu API support.
+MVP data sources:
 
-Any delete behavior requires architecture, QA, and security approval before implementation.
+- `mailu_domain`
+- `mailu_user`
+
+Data source IDs use the same natural IDs as resources.
+
+## Acceptance Test Fixtures
+
+Acceptance tests must be opt-in with `TF_ACC=1`.
+
+Required environment variables:
+
+- `MAILU_ENDPOINT`
+- `MAILU_API_TOKEN`
+- `MAILU_ACC_DOMAIN`
+
+Fixture rules:
+
+- Create only temporary domains matching `tf-acc-*.<MAILU_ACC_DOMAIN>`.
+- Create users and aliases only under the temporary domain.
+- Clean up aliases before users and users before domains.
+- Verify cleanup with reads that return `404`.
+- Refuse to run when `MAILU_ACC_DOMAIN` is empty.
 
 ## Deferred Or Unsupported
 
 - `mailu_fetchmail`: no Swagger endpoint found.
 - `mailu_server_info`: no Swagger endpoint found.
-- `mailu_dkim`: no read endpoint found; DNS DKIM value is exposed on `DomainGet.dns_dkim`, and key generation is exposed as `POST /domain/{domain}/dkim`.
+- Standalone `mailu_dkim`: no read endpoint found; DNS DKIM value is exposed on `DomainGet.dns_dkim`, and key generation is exposed as `POST /domain/{domain}/dkim`.

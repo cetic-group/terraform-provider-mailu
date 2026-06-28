@@ -2,7 +2,7 @@
 
 Manages a Mailu alias.
 
-Status: confirmed by Swagger; not implemented yet.
+Status: MVP schema frozen; not implemented yet.
 
 ## Example Usage
 
@@ -17,7 +17,7 @@ resource "mailu_alias" "postmaster" {
 
 ### Required
 
-- `email` (String) Alias email address.
+- `email` (String) Alias email address. Forces replacement.
 
 ### Optional
 
@@ -27,7 +27,7 @@ resource "mailu_alias" "postmaster" {
 
 ### Read-Only
 
-- `id` (String) Alias identifier.
+- `id` (String) Alias identifier. Same as normalized `email`.
 
 ## Import
 

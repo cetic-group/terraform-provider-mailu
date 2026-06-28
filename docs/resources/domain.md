@@ -2,13 +2,18 @@
 
 Manages a Mailu domain.
 
-Status: confirmed by Swagger; not implemented yet.
+Status: MVP schema frozen; not implemented yet.
 
 ## Example Usage
 
 ```terraform
 resource "mailu_domain" "example" {
-  name = "example.com"
+  name            = "example.com"
+  comment         = "Managed by Terraform"
+  max_users       = 25
+  max_aliases     = 50
+  max_quota_bytes = 10737418240
+  signup_enabled  = false
 }
 ```
 
@@ -16,7 +21,7 @@ resource "mailu_domain" "example" {
 
 ### Required
 
-- `name` (String) Domain name.
+- `name` (String) Domain name. Forces replacement.
 
 ### Optional
 
@@ -25,12 +30,12 @@ resource "mailu_domain" "example" {
 - `max_aliases` (Number) Maximum number of aliases.
 - `max_quota_bytes` (Number) Maximum mailbox quota in bytes.
 - `signup_enabled` (Boolean) Whether signup is enabled.
-- `alternatives` (List of String) Alternative domain names.
+- `alternatives` (Set of String) Alternative domain names.
 
 ### Read-Only
 
-- `id` (String) Domain identifier.
-- `managers` (List of String) Domain managers.
+- `id` (String) Domain identifier. Same as normalized `name`.
+- `managers` (Set of String) Domain managers.
 - `dns_autoconfig` (List of String) Autoconfiguration DNS records.
 - `dns_mx` (String) MX DNS value.
 - `dns_spf` (String) SPF DNS value.
