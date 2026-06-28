@@ -55,7 +55,7 @@ Exit criteria:
 
 ## Phase 1 - Mailu API Discovery
 
-Status: partially complete; blocked on runtime validation with a development token and disposable domain.
+Status: complete for MVP resources; extended resource runtime validation deferred to their implementation phases.
 
 Goal: capture the real API contract from the CETIC Group Mailu instance before implementing Terraform resources.
 
@@ -86,9 +86,12 @@ Exit criteria:
 - Unsupported resources are explicitly marked as blocked or deferred.
 - No implementation proceeds from unverified endpoint assumptions.
 
-Current blocker:
+Current result:
 
-- Swagger discovery is complete, but authenticated list/read/create/update/delete behavior still needs validation with `MAILU_API_TOKEN` and `MAILU_ACC_DOMAIN`.
+- Swagger discovery is complete.
+- Runtime auth and MVP CRUD validation completed on 2026-06-29.
+- `mailu_domain`, `mailu_user`, and `mailu_alias` were validated with temporary objects.
+- Extended resources such as relay, token, domain manager, alternative domain, and DKIM generation remain mapped from Swagger but need dedicated runtime validation before implementation.
 
 ## Phase 1.5 - Design Freeze For MVP
 

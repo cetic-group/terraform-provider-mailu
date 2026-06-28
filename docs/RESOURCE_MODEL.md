@@ -122,7 +122,7 @@ alias@example.com
 
 ## Delete Policy
 
-Swagger exposes `DELETE` endpoints for domains, users, aliases, alternative domains, domain managers, relays, and tokens. Runtime behavior is still pending validation. If CETIC Group prefers safer operations, the provider can implement a provider-level option such as `delete_strategy = "delete"` or `delete_strategy = "disable"` after validating Mailu API support.
+Swagger exposes `DELETE` endpoints for domains, users, aliases, alternative domains, domain managers, relays, and tokens. Runtime validation confirmed hard delete behavior for domains, users, and aliases: reads after delete return `404`. If CETIC Group prefers safer production behavior later, the provider can add a provider-level option such as `delete_strategy = "delete"` or `delete_strategy = "disable"` after validating Mailu API support.
 
 Any delete behavior requires architecture, QA, and security approval before implementation.
 

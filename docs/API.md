@@ -10,7 +10,9 @@ API title/version: `Mailu API` / `1.0`
 
 Base path: `/api/v1`
 
-Status: partially confirmed from the public Swagger document. Runtime behavior with a valid development token still needs validation before CRUD implementation.
+Status: confirmed for MVP resources (`mailu_domain`, `mailu_user`, `mailu_alias`). Extended resources are mapped from Swagger and require their own runtime validation before implementation.
+
+Runtime validation attempt: 2026-06-29
 
 ## Authentication
 
@@ -27,10 +29,28 @@ Confirmed by unauthenticated request:
 {"message": "A valid Authorization header is mandatory"}
 ```
 
-Still to validate with a development token:
+Runtime formats tested on `GET /domain`:
 
-- Whether the header value must be `Bearer <token>` or the raw token.
-- Whether invalid tokens return `403` consistently.
+| Header | Result |
+| --- | --- |
+| `Authorization: <token>` | `200` |
+| `Authorization: Bearer <token>` | `200` |
+| `Authorization: Token <token>` | `403` |
+| `Authorization: ApiKey <token>` | `403` |
+| `Authorization: Basic <base64(token:)>` | `403` |
+| `Authorization: Basic <base64(:token)>` | `403` |
+| `X-API-Key: <token>` | `401` |
+| `X-Auth-Token: <token>` | `401` |
+| `Access-Token: <token>` | `401` |
+
+Interpretation:
+
+- Mailu expects the `Authorization` header.
+- The raw token and `Bearer <token>` formats are both accepted for this installation.
+- The provider should use `Authorization: Bearer <token>` because the Swagger security scheme is named `Bearer`.
+
+Still to validate outside MVP:
+
 - Whether domain managers and global admins have different API permissions.
 
 ## Content Type
@@ -170,7 +190,7 @@ Mutable fields are the create optional fields plus `raw_password`.
 Notes:
 
 - `raw_password` is write-only input and must be sensitive.
-- `UserGet.password` is a password hash and must not be exposed as a normal Terraform attribute.
+- `UserGet.password` is returned as a string hash at runtime and must not be exposed as a normal Terraform attribute.
 - User ID/import ID should be the full email address.
 
 ### Alias
@@ -287,7 +307,7 @@ Security note:
 
 No pagination parameters are present in the Swagger paths.
 
-Runtime validation still needs to confirm behavior for large collections.
+Runtime list calls returned `200`. Large-collection behavior is not validated yet.
 
 ## Import IDs
 
@@ -312,18 +332,26 @@ When adding captured API examples:
 - Redact private keys.
 - Keep domains and email addresses only when they are intentional examples.
 
-## Runtime Validation Still Required
+## Runtime Validation Results
 
-Before implementation:
+Validated on 2026-06-29 against temporary objects matching `tf-acc-*.<MAILU_ACC_DOMAIN>`:
 
-- Test authenticated list/read calls with a development token.
-- Test whether `Authorization: Bearer <token>` or `Authorization: <token>` is required.
-- Test actual create/update/delete against a disposable domain.
-- Capture real success payloads for write operations.
-- Capture real validation failures.
-- Confirm whether `PATCH` behaves as partial update.
-- Confirm whether `DELETE` is hard delete.
-- Confirm whether collection responses are arrays for all list endpoints.
+- Authenticated list endpoint: `GET /domain` returned `200`.
+- Invalid token: `GET /domain` returned `403`.
+- Domain lifecycle: `POST`, `GET`, `PATCH`, `GET`, `DELETE`, then `GET` returned `200`, `200`, `200`, `200`, `200`, `404`.
+- User lifecycle: `POST`, `GET`, `PATCH`, `GET`, `DELETE`, then `GET` returned `200`, `200`, `200`, `200`, `200`, `404`.
+- Alias lifecycle: `POST`, `GET`, `PATCH`, `GET`, `DELETE`, then `GET` returned `200`, `200`, `200`, `200`, `200`, `404`.
+- `PATCH` works without identity fields (`name` for domains, `email` for users/aliases).
+- `DELETE` behaves as hard delete for MVP resources: reads after delete return `404`.
+- `UserGet.password` is present and is a string hash.
+
+Still to validate before implementing extended resources:
+
+- `mailu_alternative_domain`
+- `mailu_domain_manager`
+- `mailu_relay`
+- `mailu_token`
+- DKIM key generation behavior
 
 ## Agent Review Findings
 
@@ -332,15 +360,17 @@ Senior Developer Architect:
 - MVP resources are feasible from Swagger: `mailu_domain`, `mailu_user`, `mailu_alias`.
 - `mailu_fetchmail` and `mailu_server_info` must be deferred or removed because no endpoints are exposed.
 - `mailu_dkim` should start as a domain DNS data source field, not a standalone CRUD resource.
+- MVP import IDs are stable natural identifiers: domain name, user email, alias email.
 
 Senior QA:
 
 - Swagger discovery is reproducible with `curl https://mail.cetic-group.com/api/v1/swagger.json`.
-- Acceptance testing still needs a dedicated token and disposable domain before CRUD behavior can be validated.
+- MVP CRUD behavior was validated against temporary objects and cleanup was confirmed with `404` reads after delete.
 - Tests must include unauthenticated, invalid-token, duplicate, not-found, and validation-error cases.
 
 Senior Application Security:
 
 - `Authorization`, `raw_password`, token create responses, and user password hashes are sensitive.
 - Token management is high risk because create responses expose newly generated tokens.
-- Destructive operations should not be considered production-safe until runtime delete behavior is validated.
+- Destructive operations are hard deletes for MVP resources and must remain explicit in Terraform behavior.
+- `UserGet.password` is returned by the API and must be redacted from diagnostics/logs and excluded from normal schema exposure.

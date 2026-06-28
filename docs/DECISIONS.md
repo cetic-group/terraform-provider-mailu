@@ -58,15 +58,17 @@ Defer or block:
 
 ### Authentication Header
 
-Partially resolved: Swagger confirms an `Authorization` header is mandatory.
+Resolved for MVP implementation: use `Authorization: Bearer <token>`.
 
-Decision still needed: confirm whether the value must be `Bearer <token>` or the raw token with a development token.
+Reason: Swagger confirms an `Authorization` header with a `Bearer` security scheme. Runtime validation on 2026-06-29 showed both raw token and `Bearer <token>` return `200`, while invalid tokens return `403`.
 
 ### Delete Strategy
 
-Partially resolved: Swagger exposes `DELETE` endpoints.
+Resolved for MVP implementation: Terraform delete maps to Mailu `DELETE` for MVP resources.
 
-Decision still needed: validate runtime behavior and choose between hard delete, disable-on-delete, or provider-level configurable strategy for production resources.
+Reason: runtime validation on 2026-06-29 showed `DELETE` on domains, users, and aliases returns `200`, and subsequent reads return `404`.
+
+Production note: because this is hard delete behavior, acceptance tests must use disposable objects and production applies require plan review.
 
 ### DNS Ownership
 
@@ -76,6 +78,6 @@ Decision still needed: confirm this after `mailu_dkim`/domain DNS data source de
 
 ### Password Updates
 
-Partially resolved: Mailu uses `raw_password` for writes and returns `UserGet.password` as a hash.
+Resolved for MVP implementation: expose `raw_password` as sensitive write input and do not expose `UserGet.password`.
 
-Decision still needed: define Terraform state behavior for password changes without exposing the hash or causing perpetual diffs.
+Reason: Mailu uses `raw_password` for writes and returns `UserGet.password` as a string hash. The provider must not compare the raw password with the returned hash and must redact the hash from diagnostics/logs.
