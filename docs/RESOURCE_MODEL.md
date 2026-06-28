@@ -25,7 +25,7 @@ Environment variables:
 
 ## `mailu_domain`
 
-Status: confirmed by Swagger; runtime validation pending.
+Status: confirmed by Swagger and runtime validation for MVP.
 
 Represents a Mailu domain.
 
@@ -58,7 +58,7 @@ example.com
 
 ## `mailu_user`
 
-Status: confirmed by Swagger; runtime validation pending.
+Status: confirmed by Swagger and runtime validation for MVP.
 
 Represents a mailbox user.
 
@@ -99,7 +99,7 @@ user@example.com
 
 ## `mailu_alias`
 
-Status: confirmed by Swagger; runtime validation pending.
+Status: confirmed by Swagger and runtime validation for MVP.
 
 Represents a Mailu alias.
 

@@ -54,30 +54,30 @@ Defer or block:
 - `mailu_server_info`: no endpoint exposed in Swagger.
 - standalone `mailu_dkim`: no read endpoint exposed; DKIM DNS data is available through domain reads and key generation is an action.
 
-## Open
-
 ### Authentication Header
 
-Resolved for MVP implementation: use `Authorization: Bearer <token>`.
+Use `Authorization: Bearer <token>` for provider requests.
 
 Reason: Swagger confirms an `Authorization` header with a `Bearer` security scheme. Runtime validation on 2026-06-29 showed both raw token and `Bearer <token>` return `200`, while invalid tokens return `403`.
 
 ### Delete Strategy
 
-Resolved for MVP implementation: Terraform delete maps to Mailu `DELETE` for MVP resources.
+Terraform delete maps to Mailu `DELETE` for MVP resources.
 
 Reason: runtime validation on 2026-06-29 showed `DELETE` on domains, users, and aliases returns `200`, and subsequent reads return `404`.
 
 Production note: because this is hard delete behavior, acceptance tests must use disposable objects and production applies require plan review.
+
+### Password Updates
+
+Expose `raw_password` as sensitive write input and do not expose `UserGet.password`.
+
+Reason: Mailu uses `raw_password` for writes and returns `UserGet.password` as a string hash. The provider must not compare the raw password with the returned hash and must redact the hash from diagnostics/logs.
+
+## Open
 
 ### DNS Ownership
 
 Proposed direction: DNS records stay outside this provider. Mailu DNS values should be exposed as computed fields/data sources for DNS providers to consume.
 
 Decision still needed: confirm this after `mailu_dkim`/domain DNS data source design.
-
-### Password Updates
-
-Resolved for MVP implementation: expose `raw_password` as sensitive write input and do not expose `UserGet.password`.
-
-Reason: Mailu uses `raw_password` for writes and returns `UserGet.password` as a string hash. The provider must not compare the raw password with the returned hash and must redact the hash from diagnostics/logs.

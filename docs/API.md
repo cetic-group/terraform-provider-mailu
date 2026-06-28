@@ -309,6 +309,61 @@ No pagination parameters are present in the Swagger paths.
 
 Runtime list calls returned `200`. Large-collection behavior is not validated yet.
 
+## MVP Runtime Response Shape
+
+Runtime validation confirmed these top-level keys for MVP reads. Sensitive values are intentionally not captured.
+
+Domain read keys:
+
+- `name`
+- `comment`
+- `managers`
+- `max_users`
+- `max_aliases`
+- `max_quota_bytes`
+- `signup_enabled`
+- `alternatives`
+- `dns_autoconfig`
+- `dns_mx`
+- `dns_spf`
+- `dns_dkim`
+- `dns_dmarc`
+- `dns_dmarc_report`
+- `dns_tlsa`
+
+User read keys:
+
+- `email`
+- `comment`
+- `quota_bytes`
+- `quota_bytes_used`
+- `global_admin`
+- `enabled`
+- `change_pw_next_login`
+- `enable_imap`
+- `enable_pop`
+- `allow_spoofing`
+- `forward_enabled`
+- `forward_destination`
+- `forward_keep`
+- `reply_enabled`
+- `reply_subject`
+- `reply_body`
+- `reply_startdate`
+- `reply_enddate`
+- `displayed_name`
+- `spam_enabled`
+- `spam_mark_as_read`
+- `spam_threshold`
+- `password`
+
+Alias read keys:
+
+- `email`
+- `destination`
+- `comment`
+- `wildcard`
+
 ## Import IDs
 
 Recommended import IDs from Swagger path identifiers:
