@@ -19,7 +19,7 @@ Initial scope:
 
 ## Requirements
 
-- Go 1.22+
+- Go 1.24+
 - Terraform 1.8+
 - A Mailu instance with the admin API enabled
 

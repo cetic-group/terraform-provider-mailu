@@ -1,4 +1,6 @@
 BINARY_NAME=terraform-provider-mailu
+VERSION=0.1.0
+OS_ARCH=darwin_arm64
 
 .PHONY: build
 build:
@@ -14,5 +16,5 @@ tidy:
 
 .PHONY: install-local
 install-local: build
-	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/cetic-group/mailu/0.0.0/darwin_arm64
-	cp $(BINARY_NAME) ~/.terraform.d/plugins/registry.terraform.io/cetic-group/mailu/0.0.0/darwin_arm64/
+	mkdir -p ~/.terraform.d/plugins/registry.terraform.io/cetic-group/mailu/$(VERSION)/$(OS_ARCH)
+	cp $(BINARY_NAME) ~/.terraform.d/plugins/registry.terraform.io/cetic-group/mailu/$(VERSION)/$(OS_ARCH)/

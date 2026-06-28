@@ -2,89 +2,73 @@
 
 This roadmap tracks implementation of the `cetic-group/mailu` Terraform provider.
 
-Process rule: phases must be completed in order. A phase is complete only when its exit criteria are satisfied and the required architecture, QA, and security reviews have no release-blocking findings.
+Process rule: phases are handled in order. A phase is complete only when its exit criteria are satisfied and architecture, QA, and security reviews have no blocking findings.
 
-## Phase -1 - Prerequisites
+## Phase 1 - Project Baseline
 
-Status: pending.
+Status: complete.
 
-Goal: make the development environment and target Mailu environment ready.
+Goal: establish the provider project, documentation, review process, and local development prerequisites.
 
 Tasks:
 
-- Install Go 1.22+.
+- Create the provider repository scaffold.
+- Use Go module `github.com/cetic-group/terraform-provider-mailu`.
+- Use provider source `registry.terraform.io/cetic-group/mailu`.
+- Configure provider type name `mailu`.
+- Add provider configuration through HCL and environment variables.
+- Add the shared Mailu HTTP client scaffold.
+- Add initial examples, Terraform provider documentation, and project documentation.
+- Add project agents for architecture, QA, and application security.
+- Install Go 1.24+ locally.
 - Confirm Terraform 1.8+ is available.
-- Run `go mod tidy`.
-- Run `gofmt -w .`.
-- Run `go test ./...`.
-- Define the Mailu test endpoint.
-- Create or identify a disposable test domain.
-- Create a Mailu API token dedicated to provider development.
-- Store local secrets outside Git using environment variables.
-- Confirm no production mailbox/domain will be used by acceptance tests.
+- Define local test variables with `MAILU_ENDPOINT`, `MAILU_API_TOKEN`, and `MAILU_ACC_DOMAIN`.
+- Store local secrets outside Git.
 
 Exit criteria:
 
-- `go version` reports Go 1.22+.
-- `terraform version` reports Terraform 1.8+.
-- `go test ./...` passes on the scaffold.
-- `MAILU_ENDPOINT`, `MAILU_API_TOKEN`, and `MAILU_ACC_DOMAIN` are defined for local acceptance testing.
-- Test environment ownership is documented.
-
-## Phase 0 - Project Baseline
-
-Status: started.
-
-Deliverables:
-
-- Provider repository scaffold.
-- Go module `github.com/cetic-group/terraform-provider-mailu`.
-- Provider address `registry.terraform.io/cetic-group/mailu`.
-- Provider configuration through HCL and environment variables.
-- Shared Mailu HTTP client.
-- Initial examples, documentation, and project agents.
-
-Exit criteria:
-
-- `go test ./...` passes.
-- Provider can be installed locally.
-- Terraform can load the provider with `source = "cetic-group/mailu"`.
 - README links to project, Terraform, contribution, decision, API, and roadmap docs.
 - Terraform provider documentation exists under `docs/index.md`.
 - Planned resource and data source pages exist under `docs/resources` and `docs/data-sources`.
+- `.env.local` and other local secrets are ignored by Git.
+- `go version` reports Go 1.24+.
+- `terraform version` reports Terraform 1.8+.
+- `go mod tidy`, `gofmt -w .`, and `go test ./...` pass.
+- Provider can be installed locally.
+- Terraform can load the provider with `source = "cetic-group/mailu"`.
 
-## Phase 1 - Mailu API Discovery
+## Phase 2 - Mailu API Discovery
 
 Status: complete for MVP resources; extended resource runtime validation deferred to their implementation phases.
 
-Goal: capture the real API contract from the CETIC Group Mailu instance before implementing Terraform resources.
+Goal: capture the real Mailu API contract before implementing Terraform resources.
 
 Tasks:
 
 - Confirm the exact authentication mechanism.
 - Confirm endpoint paths for domains, users, aliases, DKIM, forwards, fetchmail, and server metadata.
-- Capture list, read, create, update, and delete payloads.
-- Capture response payloads for successful and failed requests.
+- Capture list, read, create, update, and delete behavior.
+- Capture response payload shape for successful and failed requests.
 - Capture pagination behavior, if any.
 - Capture stable identifiers and natural import IDs.
 - Confirm whether each object can be read after creation.
 - Confirm whether updates are patch, replace, or delete/recreate operations.
-- Confirm delete behavior for every object.
-- Confirm password handling and whether password values are ever returned.
-- Confirm whether admin flags, quota, enabled state, display name, spam threshold, and destinations are exposed.
+- Confirm delete behavior.
+- Confirm password handling and whether password hashes are returned.
+- Confirm exposed fields for admin flags, quota, enabled state, display name, spam threshold, and destinations.
 - Confirm Mailu version and API compatibility assumptions.
-- Write redacted examples in `docs/API.md`.
-- Update `docs/RESOURCE_MODEL.md` with confirmed fields and unsupported fields.
+- Write redacted findings in `docs/API.md`.
+- Update `docs/RESOURCE_MODEL.md` with confirmed and unsupported fields.
 - Update `docs/DECISIONS.md` with resolved authentication, delete, DNS, and password decisions.
 - Run architecture, QA, and security reviews.
 
 Exit criteria:
 
-- Every planned Terraform resource has an endpoint mapping.
+- Every MVP resource has endpoint mapping.
 - Import IDs are specified.
 - API gaps are documented with a fallback decision.
 - Unsupported resources are explicitly marked as blocked or deferred.
-- No implementation proceeds from unverified endpoint assumptions.
+- No MVP implementation proceeds from unverified endpoint assumptions.
 
 Current result:
 
@@ -93,7 +77,7 @@ Current result:
 - `mailu_domain`, `mailu_user`, and `mailu_alias` were validated with temporary objects.
 - Extended resources such as relay, token, domain manager, alternative domain, and DKIM generation remain mapped from Swagger but need dedicated runtime validation before implementation.
 
-## Phase 1.5 - Design Freeze For MVP
+## Phase 3 - MVP Design Freeze
 
 Status: pending.
 
@@ -101,28 +85,29 @@ Goal: freeze the first implementable provider surface before coding resources.
 
 Tasks:
 
-- Select MVP resources from confirmed API capabilities.
 - Finalize schemas for `mailu_domain`, `mailu_user`, and `mailu_alias`.
 - Mark each schema attribute as required, optional, computed, sensitive, or replacement-forcing.
 - Define Terraform IDs and import ID formats.
-- Define normalization rules for domains, localparts, and email addresses.
+- Define normalization rules for domains and email addresses.
 - Define password update behavior.
-- Define delete strategy.
+- Define delete behavior.
 - Define drift behavior for every MVP resource.
 - Define acceptance test fixtures and cleanup rules.
-- Update Terraform documentation pages from planned schemas.
+- Update Terraform documentation pages from confirmed schemas.
 
 Exit criteria:
 
 - `docs/RESOURCE_MODEL.md` matches confirmed API behavior.
-- `docs/resources/*.md` matches the MVP schemas.
-- `docs/data-sources/*.md` matches the MVP schemas.
+- `docs/resources/*.md` matches MVP schemas.
+- `docs/data-sources/*.md` matches MVP schemas.
 - `docs/DECISIONS.md` has no open blocker for MVP implementation.
 - Architecture, QA, and security reviews approve the MVP design.
 
-## Phase 2 - Provider Foundation
+## Phase 4 - Provider Foundation
 
 Status: pending.
+
+Goal: make the provider framework, client, diagnostics, and test harness implementation-ready.
 
 Tasks:
 
@@ -130,13 +115,13 @@ Tasks:
 - Implement API error types.
 - Add retry and timeout configuration.
 - Add Terraform diagnostics helpers.
-- Add provider-level `insecure_skip_tls_verify` only if needed for lab environments.
-- Add user agent with provider version.
-- Add acceptance test harness gated behind environment variables.
 - Add redaction helpers for diagnostics and logs.
+- Add user agent with provider version.
 - Add environment-variable based test configuration.
+- Add acceptance test harness gated by `TF_ACC=1`.
 - Add Makefile targets for `fmt`, `test`, and acceptance tests.
 - Add local provider install instructions for the current platform.
+- Add provider-level `insecure_skip_tls_verify` only if needed for lab environments.
 
 Acceptance test variables:
 
@@ -154,9 +139,11 @@ Exit criteria:
 - Acceptance tests can be run explicitly with `TF_ACC=1`.
 - Acceptance tests cannot run without an explicit disposable domain.
 
-## Phase 3 - MVP Resources
+## Phase 5 - MVP Resources
 
 Status: pending.
+
+Goal: implement the first useful provider surface.
 
 Resources:
 
@@ -206,29 +193,33 @@ Exit criteria:
 - Terraform documentation no longer marks implemented MVP resources as planned.
 - Architecture, QA, and security reviews are complete.
 
-## Phase 4 - Mail Operations
+## Phase 6 - Extended Mail Resources
 
 Status: pending.
 
-Resources:
+Goal: expand provider coverage after the MVP is stable.
 
-- `mailu_forward`
-- `mailu_relay`
-- `mailu_fetchmail`, only if a future API exposes it
-- `mailu_token`, if Mailu exposes manageable application tokens.
+Candidate resources:
 
-Data sources:
+- `mailu_forward`, likely modeled first as part of `mailu_user`.
+- `mailu_relay`.
+- `mailu_token`, with strict sensitive handling.
+- `mailu_alternative_domain`.
+- `mailu_domain_manager`.
+- `mailu_fetchmail`, only if a future API exposes it.
 
-- `mailu_dkim`
-- `mailu_server_info`, only if a future API exposes it
+Candidate data sources:
+
+- `mailu_dkim`, likely backed by domain DNS fields first.
+- `mailu_server_info`, only if a future API exposes it.
 
 Exit criteria:
 
-- Common mailbox lifecycle is fully managed as code.
-- DNS modules can consume DKIM values from data sources.
 - Each added object follows the same discovery, design, test, documentation, and review process as MVP resources.
+- Runtime validation exists before implementation for every extended resource.
+- Token resources do not expose generated token values outside sensitive state handling.
 
-## Phase 5 - DNS Integration Patterns
+## Phase 7 - DNS Integration Patterns
 
 Status: pending.
 
@@ -239,7 +230,7 @@ Tasks:
 - Produce examples for MX, SPF, DKIM, DMARC, MTA-STS, and autoconfig records.
 - Add an IONOS-oriented example if CETIC Group continues using IONOS DNS automation.
 - Document ownership boundaries: Mailu provider manages Mailu state, DNS provider manages DNS state.
-- Add an example that consumes `mailu_dkim` output in DNS records, if the data source is implemented.
+- Add an example that consumes `mailu_dkim` or domain DNS output in DNS records, if implemented.
 - Document which DNS records are mandatory, recommended, or optional.
 
 Exit criteria:
@@ -247,9 +238,11 @@ Exit criteria:
 - A new domain can be onboarded with Mailu and DNS using Terraform examples.
 - DNS examples do not require secrets in source files.
 
-## Phase 6 - Release Engineering
+## Phase 8 - Release Engineering
 
 Status: pending.
+
+Goal: make releases repeatable and installable.
 
 Tasks:
 
@@ -259,12 +252,12 @@ Tasks:
 - Keep Terraform Registry documentation under `docs/index.md`, `docs/resources`, and `docs/data-sources`.
 - Add changelog.
 - Add semantic versioning.
-- Publish `v0.1.0` as internal or public provider depending on CETIC Group policy.
-- Run release readiness review.
 - Decide public Terraform Registry vs internal mirror.
 - Configure release signing or checksum publication.
 - Add release notes template.
 - Add upgrade notes for breaking changes.
+- Publish `v0.1.0` as internal or public provider depending on CETIC Group policy.
+- Run release readiness review.
 
 Exit criteria:
 
@@ -273,24 +266,26 @@ Exit criteria:
 - Documentation generated for the release matches implemented schemas.
 - Release process is repeatable from a clean checkout.
 
-## Phase 7 - Hardening
+## Phase 9 - Hardening
 
 Status: pending.
 
+Goal: prepare the provider for production-grade use.
+
 Tasks:
 
-- Rate limit handling.
-- Better diff suppression for normalized email addresses.
-- Case normalization policy for domains and localparts.
-- State migration tests.
-- Import validation.
-- Partial-state handling for create/update failures.
-- Detailed acceptance tests against disposable domains.
-- Concurrency behavior review.
-- Timeout and retry tuning against real Mailu behavior.
-- Negative tests for authorization failures.
-- State upgrade framework for future schema versions.
-- Security review of CI logs and release artifacts.
+- Add rate limit handling.
+- Add diff suppression for normalized email addresses.
+- Finalize case normalization policy for domains and email addresses.
+- Add state migration tests.
+- Add import validation.
+- Add partial-state handling for create/update failures.
+- Add detailed acceptance tests against disposable domains.
+- Review concurrency behavior.
+- Tune timeouts and retries against real Mailu behavior.
+- Add negative tests for authorization failures.
+- Add state upgrade framework for future schema versions.
+- Review CI logs and release artifacts for security exposure.
 
 Exit criteria:
 
@@ -298,7 +293,7 @@ Exit criteria:
 - Production rollout checklist exists.
 - Known limitations are documented in Terraform provider docs.
 
-## Phase 8 - Production Adoption
+## Phase 10 - Production Adoption
 
 Status: pending.
 
