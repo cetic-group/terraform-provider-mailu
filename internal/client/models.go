@@ -2,7 +2,9 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
+	"strconv"
 )
 
 type Domain struct {
@@ -64,6 +66,63 @@ type Alias struct {
 	Destination []string `json:"destination,omitempty"`
 	Comment     string   `json:"comment,omitempty"`
 	Wildcard    *bool    `json:"wildcard,omitempty"`
+}
+
+type AlternativeDomain struct {
+	Name   string `json:"name"`
+	Domain string `json:"domain"`
+}
+
+type ManagerCreate struct {
+	UserEmail string `json:"user_email"`
+}
+
+type Relay struct {
+	Name    string `json:"name"`
+	SMTP    string `json:"smtp,omitempty"`
+	Comment string `json:"comment,omitempty"`
+}
+
+type RelayUpdate struct {
+	SMTP    string `json:"smtp,omitempty"`
+	Comment string `json:"comment,omitempty"`
+}
+
+type Token struct {
+	ID            FlexibleString `json:"id,omitempty"`
+	Token         string         `json:"token,omitempty"`
+	Email         string         `json:"email,omitempty"`
+	Comment       string         `json:"comment,omitempty"`
+	AuthorizedIPs []string       `json:"AuthorizedIP,omitempty"`
+	Created       string         `json:"Created,omitempty"`
+	LastEdit      string         `json:"Last edit,omitempty"`
+}
+
+type TokenUpdate struct {
+	Comment       string   `json:"comment,omitempty"`
+	AuthorizedIPs []string `json:"AuthorizedIP,omitempty"`
+}
+
+type FlexibleString string
+
+func (s *FlexibleString) UnmarshalJSON(data []byte) error {
+	var raw string
+	if err := json.Unmarshal(data, &raw); err == nil {
+		*s = FlexibleString(raw)
+		return nil
+	}
+
+	var number float64
+	if err := json.Unmarshal(data, &number); err == nil {
+		*s = FlexibleString(strconv.FormatFloat(number, 'f', -1, 64))
+		return nil
+	}
+
+	return nil
+}
+
+func (s FlexibleString) String() string {
+	return string(s)
 }
 
 func (c *Client) CreateDomain(ctx context.Context, domain Domain) error {
@@ -130,4 +189,89 @@ func (c *Client) UpdateAlias(ctx context.Context, email string, alias Alias) err
 
 func (c *Client) DeleteAlias(ctx context.Context, email string) error {
 	return c.Delete(ctx, "/alias/"+url.PathEscape(email))
+}
+
+func (c *Client) CreateAlternativeDomain(ctx context.Context, alternative AlternativeDomain) error {
+	return c.Post(ctx, "/alternative", alternative, nil)
+}
+
+func (c *Client) GetAlternativeDomain(ctx context.Context, name string) (*AlternativeDomain, error) {
+	var alternative AlternativeDomain
+	err := c.Get(ctx, "/alternative/"+url.PathEscape(name), &alternative)
+	if err != nil {
+		return nil, err
+	}
+
+	return &alternative, nil
+}
+
+func (c *Client) DeleteAlternativeDomain(ctx context.Context, name string) error {
+	return c.Delete(ctx, "/alternative/"+url.PathEscape(name))
+}
+
+func (c *Client) CreateDomainManager(ctx context.Context, domain string, manager ManagerCreate) error {
+	return c.Post(ctx, "/domain/"+url.PathEscape(domain)+"/manager", manager, nil)
+}
+
+func (c *Client) GetDomainManager(ctx context.Context, domain string, email string) error {
+	var out map[string]any
+	return c.Get(ctx, "/domain/"+url.PathEscape(domain)+"/manager/"+url.PathEscape(email), &out)
+}
+
+func (c *Client) DeleteDomainManager(ctx context.Context, domain string, email string) error {
+	return c.Delete(ctx, "/domain/"+url.PathEscape(domain)+"/manager/"+url.PathEscape(email))
+}
+
+func (c *Client) CreateRelay(ctx context.Context, relay Relay) error {
+	return c.Post(ctx, "/relay", relay, nil)
+}
+
+func (c *Client) GetRelay(ctx context.Context, name string) (*Relay, error) {
+	var relay Relay
+	err := c.Get(ctx, "/relay/"+url.PathEscape(name), &relay)
+	if err != nil {
+		return nil, err
+	}
+
+	return &relay, nil
+}
+
+func (c *Client) UpdateRelay(ctx context.Context, name string, relay RelayUpdate) error {
+	return c.Patch(ctx, "/relay/"+url.PathEscape(name), relay, nil)
+}
+
+func (c *Client) DeleteRelay(ctx context.Context, name string) error {
+	return c.Delete(ctx, "/relay/"+url.PathEscape(name))
+}
+
+func (c *Client) CreateToken(ctx context.Context, token Token) (*Token, error) {
+	var created Token
+	err := c.Post(ctx, "/token", token, &created)
+	if err != nil {
+		return nil, err
+	}
+
+	return &created, nil
+}
+
+func (c *Client) GetToken(ctx context.Context, id string) (*Token, error) {
+	var token Token
+	err := c.Get(ctx, "/token/"+url.PathEscape(id), &token)
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
+}
+
+func (c *Client) UpdateToken(ctx context.Context, id string, token TokenUpdate) error {
+	return c.Patch(ctx, "/token/"+url.PathEscape(id), token, nil)
+}
+
+func (c *Client) DeleteToken(ctx context.Context, id string) error {
+	return c.Delete(ctx, "/token/"+url.PathEscape(id))
+}
+
+func (c *Client) GenerateDKIM(ctx context.Context, domain string) error {
+	return c.Post(ctx, "/domain/"+url.PathEscape(domain)+"/dkim", nil, nil)
 }

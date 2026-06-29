@@ -27,3 +27,18 @@ func normalizeStrings(values []string, normalizer func(string) string) []string 
 
 	return out
 }
+
+func splitCompositeID(value string) (string, string, bool) {
+	left, right, ok := strings.Cut(strings.TrimSpace(value), "/")
+	if !ok {
+		return "", "", false
+	}
+
+	left = strings.TrimSpace(left)
+	right = strings.TrimSpace(right)
+	if left == "" || right == "" {
+		return "", "", false
+	}
+
+	return left, right, true
+}

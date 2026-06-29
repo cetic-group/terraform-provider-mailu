@@ -15,6 +15,10 @@ Initial scope:
 - Aliases
 - Forwards
 - DKIM metadata
+- Alternative domains
+- Domain managers
+- Relays
+- Authentication tokens
 - Mailu API discovery and import workflows
 
 ## Requirements
@@ -66,7 +70,7 @@ make testacc
 make install-local
 ```
 
-The MVP resources `mailu_domain`, `mailu_user`, and `mailu_alias` are implemented. The MVP data sources `mailu_domain` and `mailu_user` are implemented.
+The resources `mailu_domain`, `mailu_user`, `mailu_alias`, `mailu_alternative_domain`, `mailu_domain_manager`, `mailu_relay`, and `mailu_token` are implemented. The data sources `mailu_domain`, `mailu_user`, and `mailu_dkim` are implemented.
 
 `make testacc` requires:
 

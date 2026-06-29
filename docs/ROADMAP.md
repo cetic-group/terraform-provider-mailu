@@ -204,29 +204,41 @@ Current result:
 
 ## Phase 6 - Extended Mail Resources
 
-Status: pending.
+Status: complete.
 
 Goal: expand provider coverage after the MVP is stable.
 
 Candidate resources:
 
-- `mailu_forward`, likely modeled first as part of `mailu_user`.
+- `mailu_forward`, modeled first as part of `mailu_user`.
 - `mailu_relay`.
 - `mailu_token`, with strict sensitive handling.
 - `mailu_alternative_domain`.
 - `mailu_domain_manager`.
-- `mailu_fetchmail`, only if a future API exposes it.
+- `mailu_fetchmail`, blocked because no API endpoint is exposed.
 
 Candidate data sources:
 
-- `mailu_dkim`, likely backed by domain DNS fields first.
-- `mailu_server_info`, only if a future API exposes it.
+- `mailu_dkim`, backed by domain DNS fields.
+- `mailu_server_info`, blocked because no API endpoint is exposed.
 
 Exit criteria:
 
 - Each added object follows the same discovery, design, test, documentation, and review process as MVP resources.
 - Runtime validation exists before implementation for every extended resource.
 - Token resources do not expose generated token values outside sensitive state handling.
+
+Current result:
+
+- `mailu_alternative_domain`, `mailu_domain_manager`, `mailu_relay`, and `mailu_token` are implemented.
+- `mailu_dkim` is implemented as a read-only data source backed by domain DNS fields.
+- User forwarding remains modeled through `mailu_user` fields.
+- `mailu_fetchmail` and `mailu_server_info` remain blocked because the API exposes no endpoints for them.
+- Runtime validation on 2026-06-29 confirmed create/read/update/delete behavior for implemented extended resources with temporary objects.
+- DKIM generation was runtime-validated as an API action, but no Terraform resource was added because key rotation is not a CRUD lifecycle.
+- Token generated values are marked sensitive and only available from create/import-safe state handling.
+- Terraform apply, stable plan, import, and destroy pass for the full phase 6 surface.
+- A Terraform apply uncovered that Mailu returns numeric token IDs despite Swagger declaring strings; the client now accepts both string and numeric token IDs.
 
 ## Phase 7 - DNS Integration Patterns
 

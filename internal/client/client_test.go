@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -134,5 +135,22 @@ func TestClientRetriesServerErrors(t *testing.T) {
 	}
 	if attempts != 2 {
 		t.Fatalf("attempts = %d, want 2", attempts)
+	}
+}
+
+func TestTokenIDAcceptsStringOrNumber(t *testing.T) {
+	t.Parallel()
+
+	for _, input := range []string{
+		`{"id":"42"}`,
+		`{"id":42}`,
+	} {
+		var token Token
+		if err := json.Unmarshal([]byte(input), &token); err != nil {
+			t.Fatalf("unmarshal %s: %v", input, err)
+		}
+		if got, want := token.ID.String(), "42"; got != want {
+			t.Fatalf("id = %q, want %q", got, want)
+		}
 	}
 }

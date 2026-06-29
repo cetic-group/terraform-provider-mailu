@@ -10,7 +10,7 @@ API title/version: `Mailu API` / `1.0`
 
 Base path: `/api/v1`
 
-Status: confirmed for MVP resources (`mailu_domain`, `mailu_user`, `mailu_alias`). Extended resources are mapped from Swagger and require their own runtime validation before implementation.
+Status: confirmed for MVP resources and phase 6 extended resources (`mailu_alternative_domain`, `mailu_domain_manager`, `mailu_relay`, `mailu_token`, and `mailu_dkim` metadata). Unsupported resources remain explicitly deferred.
 
 Runtime validation attempt: 2026-06-29
 
@@ -400,13 +400,13 @@ Validated on 2026-06-29 against temporary objects matching `tf-acc-*.<MAILU_ACC_
 - `DELETE` behaves as hard delete for MVP resources: reads after delete return `404`.
 - `UserGet.password` is present and is a string hash.
 
-Still to validate before implementing extended resources:
+Extended resource validation on 2026-06-29 against temporary objects matching `tf-phase6-*.<MAILU_ACC_DOMAIN>`:
 
-- `mailu_alternative_domain`
-- `mailu_domain_manager`
-- `mailu_relay`
-- `mailu_token`
-- DKIM key generation behavior
+- Alternative domain lifecycle: `POST`, `GET`, `DELETE`, then `GET` returned `200`, `200`, `200`, `404`.
+- Domain manager lifecycle: `POST`, `GET`, `DELETE`, then `GET` returned `200`, `200`, `200`, `404`.
+- Relay lifecycle: `POST`, `GET`, `PATCH`, `GET`, `DELETE`, then `GET` returned `200`, `200`, `200`, `200`, `200`, `404`.
+- Token lifecycle: `POST`, `GET`, `PATCH`, `GET`, `DELETE`, then missing `GET` returned `200`, `200`, `200`, `200`, `200`, `404`.
+- DKIM generation on a disposable domain returned `200`; DKIM/DMARC values remain read through domain reads.
 
 ## Agent Review Findings
 

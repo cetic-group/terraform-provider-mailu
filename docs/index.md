@@ -2,7 +2,7 @@
 
 The Mailu provider manages Mailu domains, users, aliases, and related mail objects through the Mailu admin API.
 
-Status: MVP resources and data sources are implemented for domains, users, and aliases.
+Status: MVP and extended mail resources are implemented for domains, users, aliases, alternative domains, domain managers, relays, tokens, and DKIM metadata.
 
 ## Example Usage
 
@@ -47,22 +47,19 @@ provider "mailu" {
 - `mailu_domain`
 - `mailu_user`
 - `mailu_alias`
-
-## Planned Resources
-
-- `mailu_forward`
 - `mailu_relay`
 - `mailu_alternative_domain`
 - `mailu_domain_manager`
 - `mailu_token`
 
+## Modeled On Existing Resources
+
+- User forwarding is managed through `mailu_user` fields: `forward_enabled`, `forward_destination`, and `forward_keep`.
+
 ## Data Sources
 
 - `mailu_domain`
 - `mailu_user`
-
-## Planned Data Sources
-
 - `mailu_dkim`
 
 ## Deferred

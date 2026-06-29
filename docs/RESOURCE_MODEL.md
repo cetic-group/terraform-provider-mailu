@@ -1,8 +1,8 @@
 # Resource Model
 
-This document freezes the MVP Terraform model for the `cetic-group/mailu` provider.
+This document tracks the Terraform model for the `cetic-group/mailu` provider.
 
-Status: MVP design frozen.
+Status: MVP and phase 6 extended resource models implemented.
 
 Resource modeling decisions require architecture, QA, and security review. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -34,6 +34,10 @@ Terraform IDs:
 - Domain ID: domain name.
 - User ID: full email address.
 - Alias ID: full alias email address.
+- Alternative domain ID: alternative domain name.
+- Domain manager ID: `<domain>/<email>`.
+- Relay ID: relay name.
+- Token ID: Mailu token record ID.
 
 Delete behavior:
 
@@ -174,12 +178,131 @@ Schema:
 
 ## Data Sources
 
-MVP data sources:
+Implemented data sources:
 
 - `mailu_domain`
 - `mailu_user`
+- `mailu_dkim`
 
 Data source IDs use the same natural IDs as resources.
+
+## `mailu_alternative_domain`
+
+Status: implemented.
+
+Represents an alternative Mailu domain.
+
+Endpoint mapping:
+
+- Create/list: `POST /alternative`, `GET /alternative`
+- Read/delete: `GET /alternative/{alt}`, `DELETE /alternative/{alt}`
+
+Import ID:
+
+```text
+example.net
+```
+
+Schema:
+
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | Same as normalized `name`. |
+| `name` | required | yes | Alternative domain name. |
+| `domain` | required | yes | Parent Mailu domain name. |
+
+## `mailu_domain_manager`
+
+Status: implemented.
+
+Represents a manager assignment on a Mailu domain.
+
+Endpoint mapping:
+
+- Create/list: `POST /domain/{domain}/manager`, `GET /domain/{domain}/manager`
+- Read/delete: `GET /domain/{domain}/manager/{email}`, `DELETE /domain/{domain}/manager/{email}`
+
+Import ID:
+
+```text
+example.com/admin@example.com
+```
+
+Schema:
+
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | `<domain>/<email>`. |
+| `domain` | required | yes | Domain managed by the user. |
+| `user_email` | required | yes | Manager user email address. |
+
+## `mailu_relay`
+
+Status: implemented.
+
+Represents a Mailu relay.
+
+Endpoint mapping:
+
+- Create/list: `POST /relay`, `GET /relay`
+- Read/update/delete: `GET /relay/{name}`, `PATCH /relay/{name}`, `DELETE /relay/{name}`
+
+Import ID:
+
+```text
+example.com
+```
+
+Schema:
+
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | Same as normalized `name`. |
+| `name` | required | yes | Relayed domain name. |
+| `smtp` | optional | no | Remote SMTP host. |
+| `comment` | optional | no | Relay comment. |
+
+## `mailu_token`
+
+Status: implemented.
+
+Represents a Mailu authentication token.
+
+Endpoint mapping:
+
+- Create/list: `POST /token`, `GET /token`
+- Read/update/delete: `GET /token/{token_id}`, `PATCH /token/{token_id}`, `DELETE /token/{token_id}`
+
+Import ID:
+
+```text
+42
+```
+
+Schema:
+
+| Attribute | Kind | Replacement | Notes |
+| --- | --- | --- | --- |
+| `id` | computed | no | Mailu token record ID. |
+| `email` | required | yes | User that owns the token. |
+| `comment` | optional | no | Token comment. |
+| `authorized_ips` | optional | no | Allowed IP addresses or networks. |
+| `token` | computed, sensitive | no | Generated token value returned only during creation. |
+| `created` | computed | no | API creation timestamp. |
+| `last_edit` | computed | no | API last-edit timestamp. |
+
+Security behavior:
+
+- `token` is marked sensitive and is never logged by provider diagnostics.
+- Imported tokens cannot recover the generated token value because Mailu does not return it after creation.
+
+## `mailu_dkim`
+
+Status: implemented as a data source.
+
+Reads DKIM and DMARC DNS values from `GET /domain/{domain}`.
+
+No Terraform resource generates DKIM keys because `POST /domain/{domain}/dkim` is an action with destructive rotation semantics. Key generation should remain an explicit operator action until a safe lifecycle model is designed.
 
 ## Acceptance Test Fixtures
 
@@ -203,4 +326,4 @@ Fixture rules:
 
 - `mailu_fetchmail`: no Swagger endpoint found.
 - `mailu_server_info`: no Swagger endpoint found.
-- Standalone `mailu_dkim`: no read endpoint found; DNS DKIM value is exposed on `DomainGet.dns_dkim`, and key generation is exposed as `POST /domain/{domain}/dkim`.
+- Standalone DKIM generation resource: `POST /domain/{domain}/dkim` rotates keys and is intentionally not modeled as CRUD.

@@ -11,7 +11,7 @@ import (
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
 
-func TestMVPResourcesAndDataSourcesRegistered(t *testing.T) {
+func TestResourcesAndDataSourcesRegistered(t *testing.T) {
 	t.Parallel()
 
 	p := New("test")()
@@ -24,7 +24,15 @@ func TestMVPResourcesAndDataSourcesRegistered(t *testing.T) {
 		resourceNames[resp.TypeName] = true
 	}
 
-	for _, name := range []string{"mailu_domain", "mailu_user", "mailu_alias"} {
+	for _, name := range []string{
+		"mailu_domain",
+		"mailu_user",
+		"mailu_alias",
+		"mailu_alternative_domain",
+		"mailu_domain_manager",
+		"mailu_relay",
+		"mailu_token",
+	} {
 		if !resourceNames[name] {
 			t.Fatalf("resource %q is not registered", name)
 		}
@@ -38,7 +46,7 @@ func TestMVPResourcesAndDataSourcesRegistered(t *testing.T) {
 		dataSourceNames[resp.TypeName] = true
 	}
 
-	for _, name := range []string{"mailu_domain", "mailu_user"} {
+	for _, name := range []string{"mailu_domain", "mailu_user", "mailu_dkim"} {
 		if !dataSourceNames[name] {
 			t.Fatalf("data source %q is not registered", name)
 		}
@@ -72,6 +80,15 @@ func TestMVPResourceSensitiveAttributes(t *testing.T) {
 	}
 	if !dataSourceReplyBody.Sensitive {
 		t.Fatal("data source reply_body must be sensitive")
+	}
+
+	tokenSchema := resourceSchema(t, NewTokenResource())
+	generatedToken, ok := tokenSchema.Attributes["token"].(resourceschema.StringAttribute)
+	if !ok {
+		t.Fatalf("token has type %T, want resource string attribute", tokenSchema.Attributes["token"])
+	}
+	if !generatedToken.Sensitive {
+		t.Fatal("generated token must be sensitive")
 	}
 }
 

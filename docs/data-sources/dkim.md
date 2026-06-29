@@ -1,8 +1,8 @@
 # mailu_dkim
 
-Reads DKIM metadata for a Mailu domain.
+Reads DKIM and DMARC DNS values exposed by a Mailu domain.
 
-Status: partial. Swagger exposes DKIM generation and domain DNS output, but no dedicated DKIM read endpoint.
+Status: implemented as a read-only data source backed by domain reads.
 
 ## Example Usage
 
@@ -16,11 +16,11 @@ data "mailu_dkim" "example" {
 
 ### Required
 
-- `domain` (String) Mailu domain.
+- `domain` (String) Mailu domain name.
 
 ### Read-Only
 
-- `selector` (String) DKIM selector.
-- `public_key` (String) DKIM public key.
-- `dns_name` (String) DNS record name.
-- `dns_value` (String) DNS record value.
+- `id` (String) Same as normalized `domain`.
+- `dns_dkim` (String) DKIM DNS value.
+- `dns_dmarc` (String) DMARC DNS value.
+- `dns_dmarc_report` (String) DMARC report DNS value.
