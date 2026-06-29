@@ -304,6 +304,9 @@ Current result:
 - Release process, release notes template, changelog, and upgrade guide added.
 - Initial distribution decision is internal mirror/GitHub Releases first; public Terraform Registry publication is deferred until CETIC Group approves it.
 - `make docs` uses `terraform-plugin-docs` to regenerate provider documentation.
+- `v0.1.0-rc.1` was published as an internal pre-release with platform archives and `SHA256SUMS` attached.
+- Private installation from GitHub release assets is documented in `docs/PRIVATE_INSTALL.md`.
+- The internal release is installable through the local Terraform plugin directory while registry or mirror publication remains deferred.
 
 ## Phase 9 - Hardening
 

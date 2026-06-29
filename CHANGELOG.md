@@ -6,6 +6,10 @@ This project follows semantic versioning.
 
 ## [Unreleased]
 
+## [0.1.0-rc.1] - 2026-06-29
+
+Initial internal release candidate for CETIC Group Mailu automation.
+
 ### Added
 
 - Provider configuration, Mailu API client, diagnostics, redaction, retries, and local install workflow.
@@ -13,7 +17,3 @@ This project follows semantic versioning.
 - Data sources: `mailu_domain`, `mailu_user`, and `mailu_dkim`.
 - DNS integration guidance and Terraform examples.
 - CI and release engineering configuration.
-
-## [0.1.0] - Unreleased
-
-Initial internal release candidate for CETIC Group Mailu automation.

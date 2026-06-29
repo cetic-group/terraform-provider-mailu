@@ -97,6 +97,7 @@ terraform plan
 - [Resource model](docs/RESOURCE_MODEL.md)
 - [DNS integration](docs/DNS.md)
 - [Release process](docs/RELEASE.md)
+- [Private provider installation](docs/PRIVATE_INSTALL.md)
 - [Upgrade guide](docs/UPGRADING.md)
 - [Changelog](CHANGELOG.md)
 - [Contributing](docs/CONTRIBUTING.md)
