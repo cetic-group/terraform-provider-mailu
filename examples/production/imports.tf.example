@@ -1,0 +1,39 @@
+# Import blocks for production adoption.
+# Replace resource names and IDs with the approved production inventory.
+
+import {
+  to = mailu_domain.cetic
+  id = "cetic-group.com"
+}
+
+import {
+  to = mailu_user.admin
+  id = "admin@cetic-group.com"
+}
+
+import {
+  to = mailu_alias.postmaster
+  id = "postmaster@cetic-group.com"
+}
+
+# Additional examples:
+#
+# import {
+#   to = mailu_alternative_domain.legacy
+#   id = "legacy-cetic-group.com"
+# }
+#
+# import {
+#   to = mailu_domain_manager.admin
+#   id = "cetic-group.com/admin@cetic-group.com"
+# }
+#
+# import {
+#   to = mailu_relay.cetic
+#   id = "cetic-group.com"
+# }
+#
+# import {
+#   to = mailu_token.admin
+#   id = "42"
+# }

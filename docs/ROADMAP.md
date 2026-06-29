@@ -350,7 +350,7 @@ Current result:
 
 ## Phase 10 - Production Adoption
 
-Status: pending.
+Status: ready for controlled execution; production import and first apply pending CETIC Group approval.
 
 Goal: migrate CETIC Group Mailu management to Terraform safely.
 
@@ -371,6 +371,43 @@ Exit criteria:
 - Existing production objects are imported without unintended changes.
 - First production apply succeeds.
 - Operational runbook exists.
+
+Current result:
+
+- Production adoption runbook added in `docs/PRODUCTION_ADOPTION.md`.
+- Production scaffold added in `examples/production` with provider configuration, import block examples, and backend template.
+- Import examples now cover all implemented resources.
+- Production adoption is intentionally gated: no production import or apply was executed by automation.
+- Final completion requires CETIC Group approval, production backend configuration, production import, no-op plan review, and first low-risk apply.
+
+## Phase 11 - Public Release And Supply Chain Hardening
+
+Status: pending.
+
+Goal: prepare the provider for public Terraform Registry publication and stronger release-chain guarantees.
+
+Scope note: this phase is intentionally separate from Phase 10. Production adoption can proceed through controlled internal distribution, while public release requires additional supply-chain controls and CETIC Group publication approval.
+
+Tasks:
+
+- Confirm CETIC Group approval for public repository and Terraform Registry publication.
+- Define signing key ownership, storage, rotation, and revocation policy.
+- Pin GitHub Actions by commit SHA instead of mutable version tags.
+- Pin GoReleaser to an explicit reviewed version.
+- Add artifact signing for checksums and release archives.
+- Add provenance attestations for release builds.
+- Add secret scanning to CI and release workflows.
+- Document public release rollback and revocation procedure.
+- Validate Terraform Registry publication metadata, namespace ownership, and provider documentation.
+- Run architecture, QA, and application security release reviews before first public release.
+
+Exit criteria:
+
+- Release workflow uses pinned, reviewed dependencies.
+- Release artifacts are checksummed, signed, and accompanied by provenance attestations.
+- CETIC Group signing policy is documented and approved.
+- Terraform Registry publication procedure is documented and tested.
+- Public release approval is recorded before publishing.
 
 ## Risks
 

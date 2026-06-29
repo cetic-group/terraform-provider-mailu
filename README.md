@@ -99,6 +99,7 @@ terraform plan
 - [Release process](docs/RELEASE.md)
 - [Private provider installation](docs/PRIVATE_INSTALL.md)
 - [Hardening guide](docs/HARDENING.md)
+- [Production adoption runbook](docs/PRODUCTION_ADOPTION.md)
 - [Upgrade guide](docs/UPGRADING.md)
 - [Changelog](CHANGELOG.md)
 - [Contributing](docs/CONTRIBUTING.md)
