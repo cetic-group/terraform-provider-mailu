@@ -4,6 +4,7 @@ OS_ARCH=darwin_arm64
 GO ?= go
 GOCACHE ?= /tmp/go-build
 GOPATH ?= /tmp/go
+GORELEASER ?= goreleaser
 
 .PHONY: build
 build:
@@ -20,7 +21,20 @@ tidy:
 .PHONY: fmt
 fmt:
 	gofmt -w .
-	terraform fmt -recursive examples templates
+	terraform fmt -recursive examples
+
+.PHONY: fmt-check
+fmt-check:
+	test -z "$$(gofmt -l .)"
+	terraform fmt -check -recursive examples
+
+.PHONY: docs
+docs:
+	GOCACHE=$(GOCACHE) GOPATH=$(GOPATH) go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name mailu
+
+.PHONY: release-snapshot
+release-snapshot:
+	GOCACHE=$(GOCACHE) GOPATH=$(GOPATH) $(GORELEASER) release --snapshot --clean
 
 .PHONY: testacc
 testacc:

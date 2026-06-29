@@ -23,7 +23,7 @@ Initial scope:
 
 ## Requirements
 
-- Go 1.24+
+- Go 1.25.8+
 - Terraform 1.8+
 - A Mailu instance with the admin API enabled
 
@@ -96,5 +96,8 @@ terraform plan
 - [API contract](docs/API.md)
 - [Resource model](docs/RESOURCE_MODEL.md)
 - [DNS integration](docs/DNS.md)
+- [Release process](docs/RELEASE.md)
+- [Upgrade guide](docs/UPGRADING.md)
+- [Changelog](CHANGELOG.md)
 - [Contributing](docs/CONTRIBUTING.md)
 - [Decisions](docs/DECISIONS.md)

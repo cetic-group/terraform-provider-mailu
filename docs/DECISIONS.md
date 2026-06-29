@@ -108,4 +108,16 @@ DNS records stay outside this provider. Mailu DNS values are exposed as computed
 
 Reason: DNS providers own zones, credentials, TTLs, record-specific validation, and publication behavior. The Mailu provider owns Mailu state and exposes DNS guidance values such as MX, SPF, DKIM, DMARC, autoconfig, and TLSA.
 
+### Release Channel
+
+Use CETIC Group internal distribution first, backed by GoReleaser artifacts and SHA256 checksums. Keep provider source as `cetic-group/mailu`.
+
+Reason: the provider manages production mail infrastructure and should not be published publicly until CETIC Group explicitly approves public Terraform Registry distribution. Keeping the source address stable avoids later configuration churn.
+
+### Release Integrity
+
+Publish SHA256 checksums for every tagged release. Release signing can be added later when CETIC Group chooses a signing key management policy.
+
+Reason: checksums are immediately implementable and satisfy install integrity requirements for internal mirrors. Signing without a clear key custody model would create process risk.
+
 ## Open

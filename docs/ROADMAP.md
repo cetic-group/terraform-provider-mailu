@@ -20,7 +20,7 @@ Tasks:
 - Add the shared Mailu HTTP client scaffold.
 - Add initial examples, Terraform provider documentation, and project documentation.
 - Add project agents for architecture, QA, and application security.
-- Install Go 1.24+ locally.
+- Install Go 1.25.8+ locally.
 - Confirm Terraform 1.8+ is available.
 - Define local test variables with `MAILU_ENDPOINT`, `MAILU_API_TOKEN`, and `MAILU_ACC_DOMAIN`.
 - Store local secrets outside Git.
@@ -31,7 +31,7 @@ Exit criteria:
 - Terraform provider documentation exists under `docs/index.md`.
 - Planned resource and data source pages exist under `docs/resources` and `docs/data-sources`.
 - `.env.local` and other local secrets are ignored by Git.
-- `go version` reports Go 1.24+.
+- `go version` reports Go 1.25.8+.
 - `terraform version` reports Terraform 1.8+.
 - `go mod tidy`, `gofmt -w .`, and `go test ./...` pass.
 - Provider can be installed locally.
@@ -269,7 +269,7 @@ Current result:
 
 ## Phase 8 - Release Engineering
 
-Status: pending.
+Status: complete for internal release readiness; public Terraform Registry publication deferred by policy.
 
 Goal: make releases repeatable and installable.
 
@@ -294,6 +294,16 @@ Exit criteria:
 - The provider can be installed from the Terraform Registry or an internal mirror.
 - Documentation generated for the release matches implemented schemas.
 - Release process is repeatable from a clean checkout.
+
+Current result:
+
+- GitHub Actions CI workflow added for formatting, tests, build, and generated documentation checks.
+- GitHub Actions release workflow added for semantic version tags.
+- GoReleaser configuration added for Linux, macOS, and Windows `amd64`/`arm64` archives.
+- SHA256 checksum publication configured through GoReleaser.
+- Release process, release notes template, changelog, and upgrade guide added.
+- Initial distribution decision is internal mirror/GitHub Releases first; public Terraform Registry publication is deferred until CETIC Group approves it.
+- `make docs` uses `terraform-plugin-docs` to regenerate provider documentation.
 
 ## Phase 9 - Hardening
 
