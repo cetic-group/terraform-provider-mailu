@@ -6,7 +6,7 @@ provider "mailu" {
 variable "mailu_endpoint" {
   description = "Mailu API endpoint."
   type        = string
-  default     = "https://mail.cetic-group.com/api/v1"
+  default     = "https://mail.example.com/api/v1"
 }
 
 variable "mailu_api_token" {

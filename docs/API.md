@@ -1,6 +1,6 @@
 # Mailu API Contract
 
-Discovery source: `https://mail.cetic-group.com/api/v1/swagger.json`
+Discovery source: `https://mail.example.com/api/v1/swagger.json`
 
 Discovery date: 2026-06-28
 
@@ -419,7 +419,7 @@ Senior Developer Architect:
 
 Senior QA:
 
-- Swagger discovery is reproducible with `curl https://mail.cetic-group.com/api/v1/swagger.json`.
+- Swagger discovery is reproducible with `curl https://mail.example.com/api/v1/swagger.json`.
 - MVP CRUD behavior was validated against temporary objects and cleanup was confirmed with `404` reads after delete.
 - Tests must include unauthenticated, invalid-token, duplicate, not-found, and validation-error cases.
 

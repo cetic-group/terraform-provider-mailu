@@ -3,12 +3,12 @@
 Import commands:
 
 ```shell
-terraform import mailu_domain.cetic cetic-group.com
-terraform import mailu_user.admin admin@cetic-group.com
-terraform import mailu_alias.postmaster postmaster@cetic-group.com
-terraform import mailu_alternative_domain.legacy legacy-cetic-group.com
-terraform import mailu_domain_manager.admin cetic-group.com/admin@cetic-group.com
-terraform import mailu_relay.cetic cetic-group.com
+terraform import mailu_domain.example example.com
+terraform import mailu_user.admin admin@example.com
+terraform import mailu_alias.postmaster postmaster@example.com
+terraform import mailu_alternative_domain.legacy legacy.example.com
+terraform import mailu_domain_manager.admin example.com/admin@example.com
+terraform import mailu_relay.example example.com
 terraform import mailu_token.admin 42
 ```
 

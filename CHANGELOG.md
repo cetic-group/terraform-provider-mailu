@@ -17,7 +17,7 @@ This project follows semantic versioning.
 
 ## [0.1.0-rc.1] - 2026-06-29
 
-Initial internal release candidate for CETIC Group Mailu automation.
+Initial release candidate for Mailu automation.
 
 ### Added
 

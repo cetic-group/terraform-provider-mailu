@@ -72,6 +72,6 @@ Use `mode: testing` before enforcing a production domain.
 
 ## IONOS
 
-For CETIC Group IONOS DNS automation, keep the IONOS API key outside Git. The existing Mailu deployment already documents the expected env file shape in `mailu/mailu-data/ionos.env.example`.
+For IONOS DNS automation, keep the IONOS API key outside Git and load it through environment variables or an approved secret manager.
 
 The IONOS-oriented example under `examples/dns/ionos` produces a normalized list of records and an API-style payload that can be mapped to the selected IONOS automation layer.

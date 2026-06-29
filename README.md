@@ -1,6 +1,6 @@
 # Terraform Provider Mailu
 
-Terraform provider for managing Mailu resources for CETIC Group.
+Terraform provider for managing Mailu resources.
 
 Provider address:
 
@@ -27,7 +27,7 @@ Initial scope:
 - Terraform 1.8+
 - A Mailu instance with the admin API enabled
 
-The current CETIC Group Mailu installation already has these relevant settings in `mailu/.env`:
+The Mailu admin API must be enabled on the target instance. Common Mailu settings are:
 
 ```env
 API=true
@@ -47,7 +47,7 @@ terraform {
 }
 
 provider "mailu" {
-  endpoint = "https://mail.cetic-group.com/api/v1"
+  endpoint = "https://mail.example.com/api/v1"
   token    = var.mailu_api_token
 }
 ```
@@ -55,7 +55,7 @@ provider "mailu" {
 Environment variables are also supported:
 
 ```shell
-export MAILU_ENDPOINT="https://mail.cetic-group.com/api/v1"
+export MAILU_ENDPOINT="https://mail.example.com/api/v1"
 export MAILU_API_TOKEN="..."
 ```
 
@@ -76,7 +76,7 @@ The resources `mailu_domain`, `mailu_user`, `mailu_alias`, `mailu_alternative_do
 
 ```shell
 export TF_ACC=1
-export MAILU_ENDPOINT="https://mail.cetic-group.com/api/v1"
+export MAILU_ENDPOINT="https://mail.example.com/api/v1"
 export MAILU_API_TOKEN="..."
 export MAILU_ACC_DOMAIN="example.com"
 ```

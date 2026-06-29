@@ -160,11 +160,11 @@ Expected examples:
 
 ```hcl
 resource "mailu_domain" "cetic" {
-  name = "cetic-group.com"
+  name = "example.com"
 }
 
 resource "mailu_user" "admin" {
-  email        = "admin@cetic-group.com"
+  email        = "admin@example.com"
   raw_password = var.admin_password
   quota_bytes  = 1073741824
   enabled      = true
@@ -172,16 +172,16 @@ resource "mailu_user" "admin" {
 }
 
 resource "mailu_alias" "postmaster" {
-  email       = "postmaster@cetic-group.com"
-  destination = ["admin@cetic-group.com"]
+  email       = "postmaster@example.com"
+  destination = ["admin@example.com"]
 }
 ```
 
 Import IDs:
 
-- Domain: `cetic-group.com`
-- User: `admin@cetic-group.com`
-- Alias: `postmaster@cetic-group.com`
+- Domain: `example.com`
+- User: `admin@example.com`
+- Alias: `postmaster@example.com`
 
 Exit criteria:
 
@@ -249,7 +249,7 @@ Goal: document how this provider composes with DNS providers.
 Tasks:
 
 - Produce examples for MX, SPF, DKIM, DMARC, MTA-STS, and autoconfig records.
-- Add an IONOS-oriented example if CETIC Group continues using IONOS DNS automation.
+- Add an IONOS-oriented example for deployments using IONOS DNS automation.
 - Document ownership boundaries: Mailu provider manages Mailu state, DNS provider manages DNS state.
 - Add an example that consumes `mailu_dkim` or domain DNS output in DNS records, if implemented.
 - Document which DNS records are mandatory, recommended, or optional.
@@ -269,7 +269,7 @@ Current result:
 
 ## Phase 8 - Release Engineering
 
-Status: complete for internal release readiness; public Terraform Registry publication deferred by policy.
+Status: complete.
 
 Goal: make releases repeatable and installable.
 
@@ -281,17 +281,17 @@ Tasks:
 - Keep Terraform Registry documentation under `docs/index.md`, `docs/resources`, and `docs/data-sources`.
 - Add changelog.
 - Add semantic versioning.
-- Decide public Terraform Registry vs internal mirror.
+- Decide Terraform Registry, GitHub release asset, or private mirror distribution.
 - Configure release signing or checksum publication.
 - Add release notes template.
 - Add upgrade notes for breaking changes.
-- Publish `v0.1.0` as internal or public provider depending on CETIC Group policy.
+- Publish `v0.1.0` through GitHub Releases and Terraform Registry when publication gates are approved.
 - Run release readiness review.
 
 Exit criteria:
 
 - Tagged releases publish checksums and platform binaries.
-- The provider can be installed from the Terraform Registry or an internal mirror.
+- The provider can be installed from the Terraform Registry, GitHub release assets, or a private mirror.
 - Documentation generated for the release matches implemented schemas.
 - Release process is repeatable from a clean checkout.
 
@@ -302,11 +302,11 @@ Current result:
 - GoReleaser configuration added for Linux, macOS, and Windows `amd64`/`arm64` archives.
 - SHA256 checksum publication configured through GoReleaser.
 - Release process, release notes template, changelog, and upgrade guide added.
-- Initial distribution decision is internal mirror/GitHub Releases first; public Terraform Registry publication is deferred until CETIC Group approves it.
+- GitHub Releases and Terraform Registry publication are the primary public distribution paths.
 - `make docs` uses `terraform-plugin-docs` to regenerate provider documentation.
-- `v0.1.0-rc.1` was published as an internal pre-release with platform archives and `SHA256SUMS` attached.
+- `v0.1.0-rc.1` was published as a pre-release with platform archives and `SHA256SUMS` attached.
 - Private installation from GitHub release assets is documented in `docs/PRIVATE_INSTALL.md`.
-- The internal release is installable through the local Terraform plugin directory while registry or mirror publication remains deferred.
+- Pre-release assets are installable through the local Terraform plugin directory or a provider mirror before a stable Registry release.
 
 ## Phase 9 - Hardening
 
@@ -345,14 +345,14 @@ Current result:
 - `mailu_relay.smtp` rejects URLs that contain embedded credentials.
 - Unit tests cover rate limits, authorization non-retry behavior, import validation, relay SMTP credential rejection, generated token non-persistence, and redaction.
 - Production rollout checklist and known limitations are documented in `docs/HARDENING.md`.
-- Supply-chain signing, provenance attestations, and GitHub Actions SHA pinning are documented as pre-public-release hardening work once CETIC Group defines the signing policy.
+- Supply-chain signing, provenance attestations, and GitHub Actions SHA pinning are documented as pre-public-release hardening work.
 - Full production migration and operational adoption remain in Phase 10.
 
 ## Phase 10 - Production Adoption
 
-Status: complete for minimal internal adoption; remote production backend and broader rollout deferred.
+Status: complete for minimal adoption; remote production backend and broader rollout deferred.
 
-Goal: migrate CETIC Group Mailu management to Terraform safely.
+Goal: migrate existing Mailu management to Terraform safely.
 
 Tasks:
 
@@ -377,10 +377,10 @@ Current result:
 - Production adoption runbook added in `docs/PRODUCTION_ADOPTION.md`.
 - Production scaffold added in `examples/production` with provider configuration, import block examples, and backend template.
 - Import examples now cover all implemented resources.
-- Minimal non-production adoption validation completed from `/private/tmp/mailu-terraform-adoption` for `mailu_domain.cetic` (`cetic-group.com`) and `mailu_user.admin` (`admin@cetic-group.com`).
+- Minimal non-production adoption validation completed from `/private/tmp/mailu-terraform-adoption` for `mailu_domain.example` (`example.com`) and `mailu_user.admin` (`admin@example.com`).
 - `terraform plan -refresh=true -detailed-exitcode` returned no changes for the minimal imported state.
 - No destructive or mutating production apply was executed.
-- Remote production backend, broader production import, no-op plan review in remote state, and first low-risk apply are deferred until CETIC Group decides to run a wider production rollout or publish the provider publicly.
+- Remote production backend, broader production import, no-op plan review in remote state, and first low-risk apply are deferred until the operator decides to run a wider production rollout.
 
 ## Phase 11 - Public Release And Supply Chain Hardening
 
@@ -388,11 +388,11 @@ Status: complete for public release readiness; external GitHub and Terraform Reg
 
 Goal: prepare the provider for public Terraform Registry publication and stronger release-chain guarantees.
 
-Scope note: this phase is intentionally separate from Phase 10. Production adoption can proceed through controlled internal distribution, while public release requires additional supply-chain controls and CETIC Group publication approval.
+Scope note: this phase is intentionally separate from Phase 10. Production adoption can proceed through controlled release assets or a private mirror, while public release requires additional supply-chain controls and maintainer approval.
 
 Tasks:
 
-- Confirm CETIC Group approval for public repository and Terraform Registry publication.
+- Confirm maintainer approval for public repository and Terraform Registry publication.
 - Define signing key ownership, storage, rotation, and revocation policy.
 - Pin GitHub Actions by commit SHA instead of mutable version tags.
 - Pin GoReleaser to an explicit reviewed version.
@@ -407,7 +407,7 @@ Exit criteria:
 
 - Release workflow uses pinned, reviewed dependencies.
 - Release artifacts are checksummed, signed, and accompanied by provenance attestations.
-- CETIC Group signing policy is documented and approved.
+- Project signing policy is documented and approved.
 - Terraform Registry publication procedure is documented and tested.
 - Public release approval is recorded before publishing.
 

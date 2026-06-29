@@ -1,14 +1,14 @@
 # Production Adoption Runbook
 
-This runbook describes how CETIC Group can migrate existing Mailu objects to Terraform without unintended changes.
+This runbook describes how operators can migrate existing Mailu objects to Terraform without unintended changes.
 
 Do not run production `apply` from this repository until the inventory, imports, backend, and review gates below are complete.
 
-Current phase status: Phase 10 is complete for minimal internal adoption. The current Mailu installation only contains the initial domain and admin user, and both were imported and refreshed successfully with a no-op plan. A remote production backend, broader object rollout, and first low-risk production apply are deferred until CETIC Group starts a wider production rollout or public provider publication.
+Current phase status: Phase 10 is complete for minimal adoption validation. The tested Mailu installation only contained an initial domain and admin user, and both were imported and refreshed successfully with a no-op plan. A remote production backend, broader object rollout, and first low-risk production apply are deferred until an operator starts a wider production rollout.
 
 ## Scope
 
-Phase 10 covers internal production adoption only:
+Phase 10 covers production adoption:
 
 - Inventory existing Mailu objects.
 - Write Terraform configuration that mirrors current Mailu state.
@@ -33,7 +33,7 @@ Use provider release `0.1.0-rc.2` or newer for production adoption. Do not use `
 Store secrets only in environment variables or an approved secret manager:
 
 ```shell
-export MAILU_ENDPOINT="https://mail.cetic-group.com/api/v1"
+export MAILU_ENDPOINT="https://mail.example.com/api/v1"
 export MAILU_API_TOKEN="..."
 ```
 
@@ -55,16 +55,16 @@ Collect the current Mailu objects before writing Terraform resources:
 Recommended inventory format:
 
 ```text
-domain: cetic-group.com
+domain: example.com
 users:
-  - admin@cetic-group.com
+  - admin@example.com
 aliases:
-  - postmaster@cetic-group.com
+  - postmaster@example.com
 domain_managers:
-  - cetic-group.com/admin@cetic-group.com
+  - example.com/admin@example.com
 ```
 
-Keep the inventory in a private operational location. Do not commit production user lists unless CETIC Group approves it.
+Keep the inventory in a private operational location. Do not commit production user lists unless the organization explicitly approves it.
 
 Use `examples/production/INVENTORY_TEMPLATE.md` as the starting format.
 
@@ -87,12 +87,12 @@ Use a temporary validation workspace or local encrypted state to test imports.
 Import IDs:
 
 ```shell
-terraform import mailu_domain.cetic cetic-group.com
-terraform import mailu_user.admin admin@cetic-group.com
-terraform import mailu_alias.postmaster postmaster@cetic-group.com
-terraform import mailu_alternative_domain.old old-cetic-group.com
-terraform import mailu_domain_manager.admin cetic-group.com/admin@cetic-group.com
-terraform import mailu_relay.cetic cetic-group.com
+terraform import mailu_domain.example example.com
+terraform import mailu_user.admin admin@example.com
+terraform import mailu_alias.postmaster postmaster@example.com
+terraform import mailu_alternative_domain.old old-example.com
+terraform import mailu_domain_manager.admin example.com/admin@example.com
+terraform import mailu_relay.example example.com
 terraform import mailu_token.admin 42
 ```
 
@@ -118,8 +118,8 @@ On 2026-06-29, a minimal non-production adoption validation was completed from:
 
 Imported objects:
 
-- `mailu_domain.cetic` with ID `cetic-group.com`.
-- `mailu_user.admin` with ID `admin@cetic-group.com`.
+- `mailu_domain.example` with ID `example.com`.
+- `mailu_user.admin` with ID `admin@example.com`.
 
 Validation command:
 
@@ -130,8 +130,8 @@ terraform plan -refresh=true -detailed-exitcode
 Observed result:
 
 ```text
-mailu_domain.cetic: Refreshing state... [id=cetic-group.com]
-mailu_user.admin: Refreshing state... [id=admin@cetic-group.com]
+mailu_domain.example: Refreshing state... [id=example.com]
+mailu_user.admin: Refreshing state... [id=admin@example.com]
 
 No changes. Your infrastructure matches the configuration.
 ```
@@ -141,7 +141,7 @@ Conclusion:
 - The provider can refresh the imported Mailu domain and admin user.
 - The Terraform configuration matches the current minimal Mailu state.
 - No delete, replacement, or unexpected update was proposed.
-- This validates the minimal non-production import path for the current Mailu installation.
+- This validates the minimal non-production import path.
 
 Deferred before wider production rollout:
 
@@ -219,4 +219,4 @@ Phase 10 cannot be considered fully executed until:
 - Production import produces a no-op plan.
 - Architecture, QA, and application security reviews approve the plan.
 - First low-risk production apply succeeds.
-- The operational runbook is accepted by CETIC Group operations.
+- The operational runbook is accepted by the responsible operations team.

@@ -1,6 +1,6 @@
 # Private Provider Installation
 
-This provider is currently distributed internally through GitHub Releases or a CETIC Group mirror. Public Terraform Registry publication is deferred.
+Use this process for pre-release testing, private mirrors, or environments that cannot install directly from the Terraform Registry.
 
 Terraform configurations should still use the final provider address:
 
@@ -70,4 +70,4 @@ The checksum values must match.
 
 - Terraform cannot download this provider automatically from a private GitHub release using only `source = "cetic-group/mailu"`.
 - For private distribution, use local plugin installation or a provider mirror.
-- Public Terraform Registry publication requires CETIC Group approval and a public repository.
+- Prefer Terraform Registry installation for stable public releases.

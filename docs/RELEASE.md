@@ -2,7 +2,7 @@
 
 This project uses semantic versioning and GoReleaser.
 
-Initial channel decision: publish release artifacts to the CETIC Group internal mirror or GitHub Releases first. Public Terraform Registry publication is approved for Phase 11 after GPG signing, Terraform Registry setup, and CETIC Group release approval are complete.
+Release artifacts are published through GitHub Releases and, for stable public versions, the Terraform Registry. Private provider mirrors may be used for pre-release validation.
 
 ## Versioning
 
@@ -56,7 +56,7 @@ Each release must include:
 
 ## Registry Or Mirror
 
-Until Terraform Registry publication is complete, install from the internal mirror or local plugin path.
+Until Terraform Registry publication is complete, install from a provider mirror or local plugin path.
 
 The Terraform provider source remains:
 
@@ -66,7 +66,7 @@ cetic-group/mailu
 
 This keeps future Terraform Registry publication compatible with existing configurations.
 
-Private GitHub Releases are not a Terraform provider registry. Terraform cannot automatically download the provider from a private GitHub release with only the `source` address. Use one of these internal distribution paths until the public Registry listing is live:
+Private GitHub Releases are not a Terraform provider registry. Terraform cannot automatically download the provider from a private GitHub release with only the `source` address. Use one of these distribution paths until the public Registry listing is live:
 
 - Local plugin installation from the release archive.
 - A filesystem or network provider mirror.
@@ -97,4 +97,4 @@ Before publishing:
 - Confirm `mailu_token.token`, `mailu_user.raw_password`, provider `token`, and `reply_body` remain sensitive.
 - Confirm checksums are published with the release.
 - Confirm checksum signatures are published with public releases.
-- Confirm the GPG fingerprint matches the CETIC Group approved release key.
+- Confirm the GPG fingerprint matches the approved project release key.

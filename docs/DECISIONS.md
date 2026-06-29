@@ -32,9 +32,9 @@ Reason: Terraform state, logs, diagnostics, and CI artifacts can otherwise expos
 
 ### API Base Path
 
-Use `https://mail.cetic-group.com/api/v1` as the Mailu API endpoint for this installation.
+Use the Mailu `/api/v1` API endpoint. Public examples use `https://mail.example.com/api/v1`.
 
-Reason: `https://mail.cetic-group.com/api/v1/swagger.json` exposes Swagger 2.0 with `basePath` set to `/api/v1`.
+Reason: `https://mail.example.com/api/v1/swagger.json` exposes Swagger 2.0 with `basePath` set to `/api/v1`.
 
 ### MVP Resources
 
@@ -110,21 +110,21 @@ Reason: DNS providers own zones, credentials, TTLs, record-specific validation, 
 
 ### Release Channel
 
-Use CETIC Group internal distribution first, backed by GoReleaser artifacts and SHA256 checksums. Keep provider source as `cetic-group/mailu`.
+Use GitHub Releases and the public Terraform Registry for public distribution. Keep provider source as `cetic-group/mailu`.
 
-Reason: the provider manages production mail infrastructure and should not be published publicly until CETIC Group explicitly approves public Terraform Registry distribution. Keeping the source address stable avoids later configuration churn.
+Reason: the provider manages mail infrastructure and must have a stable Terraform source address for users.
 
 ### Release Integrity
 
-Publish SHA256 checksums for every tagged release. Release signing can be added later when CETIC Group chooses a signing key management policy.
+Publish SHA256 checksums and detached GPG signatures for every public tagged release.
 
-Reason: checksums are immediately implementable and satisfy install integrity requirements for internal mirrors. Signing without a clear key custody model would create process risk.
+Reason: checksums provide archive integrity, and GPG signatures allow Terraform Registry and users to verify release authenticity.
 
 ### Public Release Signing
 
 Use GPG signatures for public Terraform Registry releases. Sign the GoReleaser `SHA256SUMS` file and publish the detached `.sig` file with each public release.
 
-Reason: Terraform Registry requires signed provider releases. Signing the checksum file proves the platform archives match checksums signed by the CETIC Group release key.
+Reason: Terraform Registry requires signed provider releases. Signing the checksum file proves the platform archives match checksums signed by the project release key.
 
 ### GPG Key Custody
 

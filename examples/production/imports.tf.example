@@ -2,35 +2,35 @@
 # Replace resource names and IDs with the approved production inventory.
 
 import {
-  to = mailu_domain.cetic
-  id = "cetic-group.com"
+  to = mailu_domain.example
+  id = "example.com"
 }
 
 import {
   to = mailu_user.admin
-  id = "admin@cetic-group.com"
+  id = "admin@example.com"
 }
 
 import {
   to = mailu_alias.postmaster
-  id = "postmaster@cetic-group.com"
+  id = "postmaster@example.com"
 }
 
 # Additional examples:
 #
 # import {
 #   to = mailu_alternative_domain.legacy
-#   id = "legacy-cetic-group.com"
+#   id = "legacy.example.com"
 # }
 #
 # import {
 #   to = mailu_domain_manager.admin
-#   id = "cetic-group.com/admin@cetic-group.com"
+#   id = "example.com/admin@example.com"
 # }
 #
 # import {
-#   to = mailu_relay.cetic
-#   id = "cetic-group.com"
+#   to = mailu_relay.example
+#   id = "example.com"
 # }
 #
 # import {

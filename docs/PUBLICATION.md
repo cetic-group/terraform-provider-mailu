@@ -1,13 +1,13 @@
 # Public Publication And GPG Signing
 
-This document describes the CETIC Group process for publishing `cetic-group/mailu` to the public Terraform Registry.
+This document describes the process for publishing `cetic-group/mailu` to the public Terraform Registry.
 
-Public publication requires explicit CETIC Group approval. Do not publish a public release until the GitHub repository, GPG key, Terraform Registry namespace, and release workflow have been reviewed.
+Public publication requires explicit maintainer approval. Do not publish a public release until the GitHub repository, GPG key, Terraform Registry namespace, and release workflow have been reviewed.
 
 ## Publication Prerequisites
 
 - GitHub repository is public and named `terraform-provider-mailu`.
-- Terraform Registry namespace `cetic-group` is available to CETIC Group.
+- Terraform Registry namespace `cetic-group` is available to the publishing organization.
 - Provider source remains `cetic-group/mailu`.
 - GPG signing key is created, approved, stored in Vault, and added to Terraform Registry.
 - GitHub release workflow has access to signing material through approved secrets.
@@ -15,9 +15,9 @@ Public publication requires explicit CETIC Group approval. Do not publish a publ
 
 ## GPG Key Purpose
 
-GPG signing proves that release checksums were produced with a CETIC-controlled signing key.
+GPG signing proves that release checksums were produced with a project-controlled signing key.
 
-Checksums alone prove that an archive matches a published checksum. A detached GPG signature also proves that the checksum file was signed by the holder of the CETIC release key. Terraform Registry validates provider releases against the public GPG key registered for the provider.
+Checksums alone prove that an archive matches a published checksum. A detached GPG signature also proves that the checksum file was signed by the holder of the project release key. Terraform Registry validates provider releases against the public GPG key registered for the provider.
 
 ## Create The GPG Key
 
@@ -26,7 +26,7 @@ Create a dedicated release key. Do not use a personal developer key.
 Recommended identity:
 
 ```text
-CETIC Group Terraform Provider Releases <release@cetic-group.com>
+Terraform Provider Mailu Releases <release@example.com>
 ```
 
 Recommended parameters:
@@ -46,25 +46,25 @@ List the key and record the full fingerprint:
 
 ```shell
 gpg --list-secret-keys --keyid-format LONG
-gpg --fingerprint release@cetic-group.com
+gpg --fingerprint release@example.com
 ```
 
 Export the public key:
 
 ```shell
-gpg --armor --export release@cetic-group.com > cetic-terraform-provider-public.gpg
+gpg --armor --export release@example.com > terraform-provider-mailu-public.gpg
 ```
 
 Export the private key:
 
 ```shell
-gpg --armor --export-secret-keys release@cetic-group.com > cetic-terraform-provider-private.gpg
+gpg --armor --export-secret-keys release@example.com > terraform-provider-mailu-private.gpg
 ```
 
 Generate and store a revocation certificate immediately after key creation:
 
 ```shell
-gpg --output cetic-terraform-provider-revocation.asc --gen-revoke release@cetic-group.com
+gpg --output terraform-provider-mailu-revocation.asc --gen-revoke release@example.com
 ```
 
 ## Store The Key In Vault
@@ -87,7 +87,7 @@ Vault requirements:
 - Audit devices enabled.
 - Read access to private key and passphrase limited to the release process.
 - Human break-glass access documented and reviewed.
-- Rotation and revocation procedure approved by CETIC Group security.
+- Rotation and revocation procedure approved by the release and security maintainers.
 
 ## Configure GitHub
 
@@ -113,7 +113,7 @@ The private key and passphrase must come from Vault. Do not paste them into issu
 
 In Terraform Registry:
 
-1. Sign in with the GitHub account that can access the CETIC Group repository.
+1. Sign in with the GitHub account that can access the provider repository.
 2. Confirm the `cetic-group` namespace ownership.
 3. Publish a provider from the public GitHub repository `terraform-provider-mailu`.
 4. Add the GPG public key exported from Vault.
@@ -151,13 +151,13 @@ Download these release assets:
 ```text
 terraform-provider-mailu_<version>_SHA256SUMS
 terraform-provider-mailu_<version>_SHA256SUMS.sig
-cetic-terraform-provider-public.gpg
+terraform-provider-mailu-public.gpg
 ```
 
 Verify the signature:
 
 ```shell
-gpg --import cetic-terraform-provider-public.gpg
+gpg --import terraform-provider-mailu-public.gpg
 gpg --verify terraform-provider-mailu_<version>_SHA256SUMS.sig terraform-provider-mailu_<version>_SHA256SUMS
 ```
 
@@ -199,4 +199,4 @@ Emergency steps:
 7. Publish a new fixed release.
 8. Publish a security advisory if public users may be affected.
 
-Do not overwrite an already published provider version unless CETIC Group security explicitly approves the incident response. Prefer a new release version.
+Do not overwrite an already published provider version unless the security maintainers explicitly approve the incident response. Prefer a new release version.

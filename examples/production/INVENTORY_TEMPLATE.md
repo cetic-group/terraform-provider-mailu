@@ -1,6 +1,6 @@
 # Mailu Production Inventory Template
 
-Keep the completed inventory in a private operational location. Do not commit production user lists unless CETIC Group approves it.
+Keep the completed inventory in a private operational location. Do not commit production user lists unless the organization explicitly approves it.
 
 ## Change Freeze
 
@@ -20,37 +20,37 @@ Keep the completed inventory in a private operational location. Do not commit pr
 
 | Terraform address | Import ID | Managed | Notes |
 | --- | --- | --- | --- |
-| `mailu_domain.cetic` | `cetic-group.com` | yes |  |
+| `mailu_domain.example` | `example.com` | yes |  |
 
 ## Users
 
 | Terraform address | Import ID | Managed | Notes |
 | --- | --- | --- | --- |
-| `mailu_user.admin` | `admin@cetic-group.com` | yes | Do not set `raw_password` unless rotating. |
+| `mailu_user.admin` | `admin@example.com` | yes | Do not set `raw_password` unless rotating. |
 
 ## Aliases
 
 | Terraform address | Import ID | Managed | Notes |
 | --- | --- | --- | --- |
-| `mailu_alias.postmaster` | `postmaster@cetic-group.com` | yes |  |
+| `mailu_alias.postmaster` | `postmaster@example.com` | yes |  |
 
 ## Alternative Domains
 
 | Terraform address | Import ID | Managed | Notes |
 | --- | --- | --- | --- |
-| `mailu_alternative_domain.legacy` | `legacy-cetic-group.com` | no | Example only. |
+| `mailu_alternative_domain.legacy` | `legacy.example.com` | no | Example only. |
 
 ## Domain Managers
 
 | Terraform address | Import ID | Managed | Notes |
 | --- | --- | --- | --- |
-| `mailu_domain_manager.admin` | `cetic-group.com/admin@cetic-group.com` | no | Example only. |
+| `mailu_domain_manager.admin` | `example.com/admin@example.com` | no | Example only. |
 
 ## Relays
 
 | Terraform address | Import ID | Managed | Notes |
 | --- | --- | --- | --- |
-| `mailu_relay.cetic` | `cetic-group.com` | no | SMTP value must not contain credentials. |
+| `mailu_relay.example` | `example.com` | no | SMTP value must not contain credentials. |
 
 ## Tokens
 

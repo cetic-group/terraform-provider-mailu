@@ -1,6 +1,6 @@
 # Production Adoption Example
 
-This directory is a scaffold for CETIC Group production adoption.
+This directory is a scaffold for production adoption.
 
 It is intentionally incomplete and should not be applied as-is. Copy the `.example` files to real Terraform files only after the production backend, inventory, and review process are approved.
 
@@ -23,7 +23,7 @@ Before production import, complete:
 Use environment variables for Mailu credentials:
 
 ```shell
-export MAILU_ENDPOINT="https://mail.cetic-group.com/api/v1"
+export MAILU_ENDPOINT="https://mail.example.com/api/v1"
 export MAILU_API_TOKEN="..."
 ```
 

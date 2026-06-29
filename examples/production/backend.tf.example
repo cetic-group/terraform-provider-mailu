@@ -1,14 +1,14 @@
-# Configure a CETIC Group approved remote backend before production import.
+# Configure an approved remote backend before production import.
 # The backend must provide encryption at rest, state locking, auditability, and restricted access.
 #
 # Example shape only:
 #
 # terraform {
 #   backend "s3" {
-#     bucket         = "cetic-terraform-state"
+#     bucket         = "example-terraform-state"
 #     key            = "mailu/production.tfstate"
 #     region         = "eu-west-3"
-#     dynamodb_table = "cetic-terraform-locks"
+#     dynamodb_table = "example-terraform-locks"
 #     encrypt        = true
 #   }
 # }

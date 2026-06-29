@@ -10,7 +10,7 @@ Resource modeling decisions require architecture, QA, and security review. See [
 
 ```hcl
 provider "mailu" {
-  endpoint = "https://mail.cetic-group.com/api/v1"
+  endpoint = "https://mail.example.com/api/v1"
   token    = var.mailu_api_token
 }
 ```
