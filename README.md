@@ -59,12 +59,23 @@ export MAILU_API_TOKEN="..."
 
 ```shell
 go mod tidy
-make test
+make fmt
 make build
+make test
+make testacc
 make install-local
 ```
 
-Resources are intentionally not implemented until the Mailu API contract is captured from the running instance.
+The MVP resources `mailu_domain`, `mailu_user`, and `mailu_alias` are implemented. The MVP data sources `mailu_domain` and `mailu_user` are implemented.
+
+`make testacc` requires:
+
+```shell
+export TF_ACC=1
+export MAILU_ENDPOINT="https://mail.cetic-group.com/api/v1"
+export MAILU_API_TOKEN="..."
+export MAILU_ACC_DOMAIN="example.com"
+```
 
 ## Local Terraform Test
 

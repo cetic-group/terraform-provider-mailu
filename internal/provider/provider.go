@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/cetic-group/terraform-provider-mailu/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -26,8 +27,12 @@ type mailuProvider struct {
 }
 
 type mailuProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
-	Token    types.String `tfsdk:"token"`
+	Endpoint              types.String `tfsdk:"endpoint"`
+	Token                 types.String `tfsdk:"token"`
+	TimeoutSeconds        types.Int64  `tfsdk:"timeout_seconds"`
+	MaxRetries            types.Int64  `tfsdk:"max_retries"`
+	UserAgent             types.String `tfsdk:"user_agent"`
+	InsecureSkipTLSVerify types.Bool   `tfsdk:"insecure_skip_tls_verify"`
 }
 
 func (p *mailuProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -48,6 +53,22 @@ func (p *mailuProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 				Sensitive:           true,
 				MarkdownDescription: "Mailu API token. Can also be set with `MAILU_API_TOKEN`.",
 			},
+			"timeout_seconds": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "HTTP client timeout in seconds. Can also be set with `MAILU_TIMEOUT_SECONDS`. Defaults to 30.",
+			},
+			"max_retries": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum number of retries for retryable API responses. Can also be set with `MAILU_MAX_RETRIES`. Defaults to 2.",
+			},
+			"user_agent": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "User-Agent sent to the Mailu API. Can also be set with `MAILU_USER_AGENT`.",
+			},
+			"insecure_skip_tls_verify": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Skip TLS certificate verification. Can also be set with `MAILU_INSECURE_SKIP_TLS_VERIFY`. Intended only for lab environments.",
+			},
 		},
 	}
 }
@@ -62,6 +83,10 @@ func (p *mailuProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	endpoint := os.Getenv("MAILU_ENDPOINT")
 	token := os.Getenv("MAILU_API_TOKEN")
+	timeoutSeconds := os.Getenv("MAILU_TIMEOUT_SECONDS")
+	maxRetries := os.Getenv("MAILU_MAX_RETRIES")
+	userAgent := os.Getenv("MAILU_USER_AGENT")
+	insecureSkipTLSVerify := strings.EqualFold(os.Getenv("MAILU_INSECURE_SKIP_TLS_VERIFY"), "true")
 
 	if !config.Endpoint.IsNull() {
 		endpoint = config.Endpoint.ValueString()
@@ -69,6 +94,38 @@ func (p *mailuProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	if !config.Token.IsNull() {
 		token = config.Token.ValueString()
+	}
+
+	timeout, err := parseTimeoutSeconds(timeoutSeconds)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("timeout_seconds"),
+			"Invalid Mailu Timeout",
+			"MAILU_TIMEOUT_SECONDS must be an integer number of seconds.",
+		)
+	}
+	if !config.TimeoutSeconds.IsNull() {
+		timeout = timeDurationFromSeconds(config.TimeoutSeconds.ValueInt64())
+	}
+
+	retries, err := parseIntEnv(maxRetries)
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("max_retries"),
+			"Invalid Mailu Retry Count",
+			"MAILU_MAX_RETRIES must be an integer.",
+		)
+	}
+	if !config.MaxRetries.IsNull() {
+		retries = int(config.MaxRetries.ValueInt64())
+	}
+
+	if !config.UserAgent.IsNull() {
+		userAgent = config.UserAgent.ValueString()
+	}
+
+	if !config.InsecureSkipTLSVerify.IsNull() {
+		insecureSkipTLSVerify = config.InsecureSkipTLSVerify.ValueBool()
 	}
 
 	if endpoint == "" {
@@ -91,9 +148,16 @@ func (p *mailuProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	mailuClient, err := client.New(endpoint, token)
+	mailuClient, err := client.NewWithConfig(client.Config{
+		Endpoint:              endpoint,
+		Token:                 token,
+		Timeout:               timeout,
+		MaxRetries:            retries,
+		UserAgent:             userAgentForVersion(p.version, userAgent),
+		InsecureSkipTLSVerify: insecureSkipTLSVerify,
+	})
 	if err != nil {
-		resp.Diagnostics.AddError("Invalid Mailu Client Configuration", err.Error())
+		resp.Diagnostics.AddError("Invalid Mailu Client Configuration", client.Redact(err.Error()))
 		return
 	}
 
@@ -102,9 +166,16 @@ func (p *mailuProvider) Configure(ctx context.Context, req provider.ConfigureReq
 }
 
 func (p *mailuProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewDomainDataSource,
+		NewUserDataSource,
+	}
 }
 
 func (p *mailuProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewDomainResource,
+		NewUserResource,
+		NewAliasResource,
+	}
 }

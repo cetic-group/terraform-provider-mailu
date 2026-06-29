@@ -105,7 +105,7 @@ Exit criteria:
 
 ## Phase 4 - Provider Foundation
 
-Status: pending.
+Status: complete.
 
 Goal: make the provider framework, client, diagnostics, and test harness implementation-ready.
 
@@ -141,7 +141,7 @@ Exit criteria:
 
 ## Phase 5 - MVP Resources
 
-Status: pending.
+Status: complete.
 
 Goal: implement the first useful provider surface.
 
@@ -192,6 +192,15 @@ Exit criteria:
 - Examples run against the test environment.
 - Terraform documentation no longer marks implemented MVP resources as planned.
 - Architecture, QA, and security reviews are complete.
+
+Current result:
+
+- `mailu_domain`, `mailu_user`, and `mailu_alias` are implemented with CRUD and import support.
+- `mailu_domain` and `mailu_user` data sources are implemented.
+- Runtime validation on 2026-06-29 created, read, imported, detected drift on, and destroyed temporary MVP objects under `tf-phase5-*.<MAILU_ACC_DOMAIN>`.
+- Terraform plan output keeps `raw_password` and `reply_body` sensitive.
+- Documentation and examples now describe the implemented MVP surface.
+- Architecture, QA, and application security reviews found no blocking issue for the MVP scope.
 
 ## Phase 6 - Extended Mail Resources
 

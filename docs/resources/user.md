@@ -2,7 +2,7 @@
 
 Manages a Mailu mailbox user.
 
-Status: MVP schema frozen; not implemented yet.
+Status: implemented in the MVP provider surface.
 
 ## Example Usage
 
@@ -21,10 +21,10 @@ resource "mailu_user" "admin" {
 ### Required
 
 - `email` (String) User email address. Forces replacement.
-- `raw_password` (String, Sensitive) Raw password. Required for create, optional for updates, and never read back.
 
 ### Optional
 
+- `raw_password` (String, Sensitive) Raw password. Required for create, optional for updates, and never read back from the API.
 - `comment` (String) User comment.
 - `quota_bytes` (Number) Mailbox quota in bytes.
 - `enabled` (Boolean) Whether the user is enabled.

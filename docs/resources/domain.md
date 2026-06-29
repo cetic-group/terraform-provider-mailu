@@ -2,7 +2,7 @@
 
 Manages a Mailu domain.
 
-Status: MVP schema frozen; not implemented yet.
+Status: implemented in the MVP provider surface.
 
 ## Example Usage
 
