@@ -384,7 +384,7 @@ Current result:
 
 ## Phase 11 - Public Release And Supply Chain Hardening
 
-Status: pending.
+Status: complete for public release readiness; external GitHub and Terraform Registry actions remain manual gates.
 
 Goal: prepare the provider for public Terraform Registry publication and stronger release-chain guarantees.
 
@@ -410,6 +410,17 @@ Exit criteria:
 - CETIC Group signing policy is documented and approved.
 - Terraform Registry publication procedure is documented and tested.
 - Public release approval is recorded before publishing.
+
+Current result:
+
+- GitHub Actions are pinned by commit SHA in CI and release workflows.
+- GoReleaser is pinned to `v2.16.0` in the release workflow.
+- GoReleaser signs the `SHA256SUMS` file with GPG and publishes the detached `.sig` asset.
+- Terraform Registry manifest is added at `terraform-registry-manifest.json`, included in checksums, and published as a release asset.
+- GitHub provenance attestations are generated for release artifacts.
+- Secret scanning is added to CI and release workflows through `make secret-scan`.
+- Public publication, GPG creation, Vault storage, GitHub environment secrets, Terraform Registry key setup, rotation, and revocation are documented in `docs/PUBLICATION.md`.
+- Manual gates remain outside the repository: make GitHub repository public, create/store the GPG key in Vault, configure GitHub release environment secrets, add the public key to Terraform Registry, and publish the provider from the Terraform Registry UI.
 
 ## Risks
 

@@ -5,6 +5,7 @@ GO ?= go
 GOCACHE ?= /tmp/go-build
 GOPATH ?= /tmp/go
 GORELEASER ?= goreleaser
+GITLEAKS_VERSION ?= v8.28.0
 
 .PHONY: build
 build:
@@ -31,6 +32,10 @@ fmt-check:
 .PHONY: docs
 docs:
 	GOCACHE=$(GOCACHE) GOPATH=$(GOPATH) go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name mailu
+
+.PHONY: secret-scan
+secret-scan:
+	GOCACHE=$(GOCACHE) GOPATH=$(GOPATH) $(GO) run github.com/zricethezav/gitleaks/v8@$(GITLEAKS_VERSION) git --redact --verbose
 
 .PHONY: release-snapshot
 release-snapshot:

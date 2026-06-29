@@ -97,6 +97,7 @@ terraform plan
 - [Resource model](docs/RESOURCE_MODEL.md)
 - [DNS integration](docs/DNS.md)
 - [Release process](docs/RELEASE.md)
+- [Public publication and GPG signing](docs/PUBLICATION.md)
 - [Private provider installation](docs/PRIVATE_INSTALL.md)
 - [Hardening guide](docs/HARDENING.md)
 - [Production adoption runbook](docs/PRODUCTION_ADOPTION.md)

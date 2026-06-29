@@ -120,6 +120,24 @@ Publish SHA256 checksums for every tagged release. Release signing can be added 
 
 Reason: checksums are immediately implementable and satisfy install integrity requirements for internal mirrors. Signing without a clear key custody model would create process risk.
 
+### Public Release Signing
+
+Use GPG signatures for public Terraform Registry releases. Sign the GoReleaser `SHA256SUMS` file and publish the detached `.sig` file with each public release.
+
+Reason: Terraform Registry requires signed provider releases. Signing the checksum file proves the platform archives match checksums signed by the CETIC Group release key.
+
+### GPG Key Custody
+
+Use Vault as the source of authority for GPG private key, passphrase, public key, fingerprint, and revocation certificate. GitHub environment secrets are only an operational copy for the protected `release` workflow.
+
+Reason: Vault provides access control, auditability, versioned secret storage, and revocation workflows. GitHub Secrets alone do not provide enough custody process for a public release signing key.
+
+### Public Registry Manifest
+
+Publish `terraform-registry-manifest.json` as a versioned release asset and include it in `SHA256SUMS`.
+
+Reason: the provider uses the Terraform Plugin Framework and must advertise protocol version `6.0` to the Terraform Registry.
+
 ### Generated Token State
 
 Do not persist generated `mailu_token.token` values in Terraform state.

@@ -6,6 +6,15 @@ This project follows semantic versioning.
 
 ## [Unreleased]
 
+### Added
+
+- Public Terraform Registry publication workflow hardening.
+- GPG signing configuration for release checksums.
+- Terraform Registry manifest release asset.
+- GitHub artifact provenance attestations.
+- Secret scanning target and CI job.
+- Public publication, GPG key, Vault storage, rotation, and revocation documentation.
+
 ## [0.1.0-rc.1] - 2026-06-29
 
 Initial internal release candidate for CETIC Group Mailu automation.

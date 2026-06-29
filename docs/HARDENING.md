@@ -33,5 +33,6 @@ This guide records the production hardening rules for the Mailu Terraform provid
 - `mailu_fetchmail` and `mailu_server_info` are not implemented because Mailu exposes no API endpoints for them in this installation.
 - Mailu object identity is normalized to lowercase for domains and email addresses.
 - Dependencies between domains, users, aliases, managers, and tokens are represented through Terraform references in configuration, not enforced by the Mailu provider schema.
-- Release artifacts are checksummed, but signing and provenance attestations are deferred until CETIC Group defines a signing key policy.
-- GitHub Actions are not yet pinned by commit SHA; this must be completed before a public Terraform Registry release.
+- Release artifacts are checksummed and public release checksums are signed with the CETIC Group GPG release key.
+- GitHub Actions are pinned by commit SHA for CI and release workflows.
+- GPG signing material is governed by [Public Publication And GPG Signing](PUBLICATION.md) and stored in Vault as the source of authority.
