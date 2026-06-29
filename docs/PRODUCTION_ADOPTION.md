@@ -4,6 +4,8 @@ This runbook describes how CETIC Group can migrate existing Mailu objects to Ter
 
 Do not run production `apply` from this repository until the inventory, imports, backend, and review gates below are complete.
 
+Current phase status: Phase 10 is complete for minimal internal adoption. The current Mailu installation only contains the initial domain and admin user, and both were imported and refreshed successfully with a no-op plan. A remote production backend, broader object rollout, and first low-risk production apply are deferred until CETIC Group starts a wider production rollout or public provider publication.
+
 ## Scope
 
 Phase 10 covers internal production adoption only:
@@ -17,6 +19,8 @@ Phase 10 covers internal production adoption only:
 - Apply one low-risk production change after review.
 
 Public Terraform Registry publication and release supply-chain hardening are handled in Phase 11.
+
+Use provider release `0.1.0-rc.2` or newer for production adoption. Do not use `0.1.0-rc.1`, which was published before the phase 9 hardening changes.
 
 ## Required Inputs
 
@@ -103,6 +107,49 @@ terraform plan
 The expected result before production adoption is a no-op `terraform plan`.
 
 Use `examples/production/PLAN_REVIEW_CHECKLIST.md` to record the review result.
+
+## Minimal Adoption Validation
+
+On 2026-06-29, a minimal non-production adoption validation was completed from:
+
+```text
+/private/tmp/mailu-terraform-adoption
+```
+
+Imported objects:
+
+- `mailu_domain.cetic` with ID `cetic-group.com`.
+- `mailu_user.admin` with ID `admin@cetic-group.com`.
+
+Validation command:
+
+```shell
+terraform plan -refresh=true -detailed-exitcode
+```
+
+Observed result:
+
+```text
+mailu_domain.cetic: Refreshing state... [id=cetic-group.com]
+mailu_user.admin: Refreshing state... [id=admin@cetic-group.com]
+
+No changes. Your infrastructure matches the configuration.
+```
+
+Conclusion:
+
+- The provider can refresh the imported Mailu domain and admin user.
+- The Terraform configuration matches the current minimal Mailu state.
+- No delete, replacement, or unexpected update was proposed.
+- This validates the minimal non-production import path for the current Mailu installation.
+
+Deferred before wider production rollout:
+
+- Approved production backend configuration.
+- Production import into the approved backend.
+- Production no-op plan review.
+- First low-risk production apply.
+- Post-apply no-op plan.
 
 ## Step 4 - Production Backend
 

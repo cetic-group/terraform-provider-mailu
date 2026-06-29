@@ -350,7 +350,7 @@ Current result:
 
 ## Phase 10 - Production Adoption
 
-Status: ready for controlled execution; production import and first apply pending CETIC Group approval.
+Status: complete for minimal internal adoption; remote production backend and broader rollout deferred.
 
 Goal: migrate CETIC Group Mailu management to Terraform safely.
 
@@ -368,8 +368,8 @@ Tasks:
 
 Exit criteria:
 
-- Existing production objects are imported without unintended changes.
-- First production apply succeeds.
+- Existing minimal Mailu objects are imported without unintended changes.
+- Minimal imported state produces a no-op plan.
 - Operational runbook exists.
 
 Current result:
@@ -377,8 +377,10 @@ Current result:
 - Production adoption runbook added in `docs/PRODUCTION_ADOPTION.md`.
 - Production scaffold added in `examples/production` with provider configuration, import block examples, and backend template.
 - Import examples now cover all implemented resources.
-- Production adoption is intentionally gated: no production import or apply was executed by automation.
-- Final completion requires CETIC Group approval, production backend configuration, production import, no-op plan review, and first low-risk apply.
+- Minimal non-production adoption validation completed from `/private/tmp/mailu-terraform-adoption` for `mailu_domain.cetic` (`cetic-group.com`) and `mailu_user.admin` (`admin@cetic-group.com`).
+- `terraform plan -refresh=true -detailed-exitcode` returned no changes for the minimal imported state.
+- No destructive or mutating production apply was executed.
+- Remote production backend, broader production import, no-op plan review in remote state, and first low-risk apply are deferred until CETIC Group decides to run a wider production rollout or publish the provider publicly.
 
 ## Phase 11 - Public Release And Supply Chain Hardening
 
