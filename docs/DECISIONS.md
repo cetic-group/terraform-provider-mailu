@@ -102,10 +102,10 @@ Acceptance tests must create only temporary domains matching `tf-acc-*.<MAILU_AC
 
 Reason: runtime validation confirmed hard delete behavior, so tests must avoid production objects and verify cleanup with `404` reads after deletion.
 
-## Open
-
 ### DNS Ownership
 
-Proposed direction: DNS records stay outside this provider. Mailu DNS values should be exposed as computed fields/data sources for DNS providers to consume.
+DNS records stay outside this provider. Mailu DNS values are exposed as computed fields and data sources for DNS providers to consume.
 
-Decision still needed: confirm this after `mailu_dkim`/domain DNS data source design.
+Reason: DNS providers own zones, credentials, TTLs, record-specific validation, and publication behavior. The Mailu provider owns Mailu state and exposes DNS guidance values such as MX, SPF, DKIM, DMARC, autoconfig, and TLSA.
+
+## Open

@@ -62,6 +62,10 @@ provider "mailu" {
 - `mailu_user`
 - `mailu_dkim`
 
+## DNS Integration
+
+DNS records are managed by DNS providers, not by this provider. See [DNS integration](DNS.md) for MX, SPF, DKIM, DMARC, MTA-STS, autoconfig, TLSA, and IONOS-oriented patterns.
+
 ## Deferred
 
 - `mailu_fetchmail`: no Swagger endpoint found.

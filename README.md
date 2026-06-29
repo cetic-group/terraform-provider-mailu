@@ -95,5 +95,6 @@ terraform plan
 - [Roadmap](docs/ROADMAP.md)
 - [API contract](docs/API.md)
 - [Resource model](docs/RESOURCE_MODEL.md)
+- [DNS integration](docs/DNS.md)
 - [Contributing](docs/CONTRIBUTING.md)
 - [Decisions](docs/DECISIONS.md)

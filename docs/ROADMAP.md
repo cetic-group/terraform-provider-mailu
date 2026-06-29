@@ -242,7 +242,7 @@ Current result:
 
 ## Phase 7 - DNS Integration Patterns
 
-Status: pending.
+Status: complete.
 
 Goal: document how this provider composes with DNS providers.
 
@@ -258,6 +258,14 @@ Exit criteria:
 
 - A new domain can be onboarded with Mailu and DNS using Terraform examples.
 - DNS examples do not require secrets in source files.
+
+Current result:
+
+- DNS ownership boundaries are documented in `docs/DNS.md` and `docs/DECISIONS.md`.
+- Generic DNS composition example exists under `examples/dns/generic`.
+- IONOS-oriented payload example exists under `examples/dns/ionos`.
+- DNS docs cover MX, SPF, DKIM, DMARC, MTA-STS, TLS reporting, autoconfig, TLSA, and record priority.
+- Examples use provider variables and environment variables for secrets; no DNS or Mailu secret is committed.
 
 ## Phase 8 - Release Engineering
 
