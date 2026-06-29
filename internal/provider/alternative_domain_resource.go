@@ -87,7 +87,11 @@ func (r *alternativeDomainResource) Create(ctx context.Context, req resource.Cre
 
 	read, err := r.client.GetAlternativeDomain(ctx, alternative.Name)
 	if err != nil {
-		addClientError(&resp.Diagnostics, "Read Mailu Alternative Domain After Create Failed", err)
+		plan.ID = types.StringValue(alternative.Name)
+		plan.Name = types.StringValue(alternative.Name)
+		plan.Domain = types.StringValue(alternative.Domain)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		addPartialCreateWarning(&resp.Diagnostics, "Alternative Domain", err)
 		return
 	}
 
@@ -133,7 +137,11 @@ func (r *alternativeDomainResource) Delete(ctx context.Context, req resource.Del
 }
 
 func (r *alternativeDomainResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	id := normalizeDomain(req.ID)
+	id, err := validateDomainImportID(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Alternative Domain Import ID", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), id)...)
 }

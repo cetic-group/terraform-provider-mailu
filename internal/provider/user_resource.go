@@ -140,7 +140,10 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	read, err := r.client.GetUser(ctx, user.Email)
 	if err != nil {
-		addClientError(&resp.Diagnostics, "Read Mailu User After Create Failed", err)
+		plan.ID = types.StringValue(user.Email)
+		plan.Email = types.StringValue(user.Email)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		addPartialCreateWarning(&resp.Diagnostics, "User", err)
 		return
 	}
 
@@ -210,7 +213,11 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	id := normalizeEmail(req.ID)
+	id, err := validateEmailImportID(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu User Import ID", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("email"), id)...)
 }

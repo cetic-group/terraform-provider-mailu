@@ -120,4 +120,16 @@ Publish SHA256 checksums for every tagged release. Release signing can be added 
 
 Reason: checksums are immediately implementable and satisfy install integrity requirements for internal mirrors. Signing without a clear key custody model would create process risk.
 
+### Generated Token State
+
+Do not persist generated `mailu_token.token` values in Terraform state.
+
+Reason: Terraform marks sensitive attributes in CLI output, but state still stores sensitive values in clear text unless the backend protects them. Generated Mailu tokens are credentials and must be captured through a controlled secret workflow outside Terraform state.
+
+### Relay SMTP Credentials
+
+Reject `mailu_relay.smtp` URLs containing embedded credentials.
+
+Reason: relay credentials in URLs would be stored in Terraform configuration and state. The provider accepts credential-free relay endpoints only.
+
 ## Open

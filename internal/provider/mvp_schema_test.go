@@ -7,6 +7,7 @@ import (
 	"github.com/cetic-group/terraform-provider-mailu/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	datasourceschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 )
@@ -100,6 +101,71 @@ func TestMVPImportIDsAreNormalized(t *testing.T) {
 	}
 	if got, want := normalizeEmail(" ADMIN@EXAMPLE.COM "), "admin@example.com"; got != want {
 		t.Fatalf("email import id = %q, want %q", got, want)
+	}
+}
+
+func TestImportIDValidation(t *testing.T) {
+	t.Parallel()
+
+	if got, err := validateDomainImportID(" EXAMPLE.COM "); err != nil || got != "example.com" {
+		t.Fatalf("domain import = %q, %v; want example.com, nil", got, err)
+	}
+	for _, input := range []string{"", " ", "example.com/admin", "admin@example.com"} {
+		if _, err := validateDomainImportID(input); err == nil {
+			t.Fatalf("domain import %q should fail", input)
+		}
+	}
+
+	if got, err := validateEmailImportID(" ADMIN@EXAMPLE.COM "); err != nil || got != "admin@example.com" {
+		t.Fatalf("email import = %q, %v; want admin@example.com, nil", got, err)
+	}
+	for _, input := range []string{"", "admin", "admin@", "@example.com", "admin/example.com"} {
+		if _, err := validateEmailImportID(input); err == nil {
+			t.Fatalf("email import %q should fail", input)
+		}
+	}
+
+	if got, err := validateTokenImportID(" 42 "); err != nil || got != "42" {
+		t.Fatalf("token import = %q, %v; want 42, nil", got, err)
+	}
+	for _, input := range []string{"", " ", "token/42", "token 42"} {
+		if _, err := validateTokenImportID(input); err == nil {
+			t.Fatalf("token import %q should fail", input)
+		}
+	}
+}
+
+func TestRelaySMTPRejectsCredentials(t *testing.T) {
+	t.Parallel()
+
+	var diags diag.Diagnostics
+	validateRelaySMTP("smtp://user:pass@mail.example.com:587", &diags)
+	if !diags.HasError() {
+		t.Fatal("expected diagnostics for relay SMTP credentials")
+	}
+
+	var clean diag.Diagnostics
+	validateRelaySMTP("mail.example.com:587", &clean)
+	if clean.HasError() {
+		t.Fatalf("unexpected diagnostics for credential-free SMTP: %v", clean)
+	}
+}
+
+func TestTokenApplyAPIDoesNotPersistGeneratedToken(t *testing.T) {
+	t.Parallel()
+
+	var model tokenModel
+	var diags diag.Diagnostics
+	model.applyAPI(context.Background(), &client.Token{
+		ID:    client.FlexibleString("42"),
+		Email: "ADMIN@EXAMPLE.COM",
+		Token: "generated-secret",
+	}, false, &diags)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics: %v", diags)
+	}
+	if !model.Token.IsNull() {
+		t.Fatalf("generated token should not be stored in state: %#v", model.Token)
 	}
 }
 

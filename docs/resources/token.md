@@ -37,4 +37,4 @@ resource "mailu_token" "admin" {
 - `created` (String)
 - `id` (String) The ID of this resource.
 - `last_edit` (String)
-- `token` (String, Sensitive)
+- `token` (String, Sensitive) Generated token value. This provider does not persist generated token values in Terraform state after hardening because Terraform state stores sensitive values in clear text.

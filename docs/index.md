@@ -3,11 +3,14 @@
 page_title: "mailu Provider"
 description: |-
   Manage Mailu domains, users, aliases, and related mail objects through the Mailu admin API.
+  Known limitations: Terraform state must be protected by the selected backend, generated Mailu token values are not persisted in state, DNS records are managed by DNS providers, and Mailu object identities are normalized to lowercase.
 ---
 
 # mailu Provider
 
 Manage Mailu domains, users, aliases, and related mail objects through the Mailu admin API.
+
+Known limitations: Terraform state must be protected by the selected backend, generated Mailu token values are not persisted in state, DNS records are managed by DNS providers, and Mailu object identities are normalized to lowercase.
 
 
 

@@ -60,8 +60,9 @@ func (r *tokenResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				ElementType: types.StringType,
 			},
 			"token": schema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
+				Computed:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Generated token value. This provider does not persist generated token values in Terraform state after hardening because Terraform state stores sensitive values in clear text.",
 			},
 			"created":   schema.StringAttribute{Computed: true},
 			"last_edit": schema.StringAttribute{Computed: true},
@@ -102,8 +103,12 @@ func (r *tokenResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	plan.applyAPI(ctx, created, true, &resp.Diagnostics)
+	plan.applyAPI(ctx, created, false, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.AddWarning(
+		"Mailu Token Value Not Stored",
+		"Mailu returned a generated token value, but the provider intentionally does not store it in Terraform state. Create tokens through a controlled workflow if the secret value must be captured.",
+	)
 }
 
 func (r *tokenResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -168,7 +173,12 @@ func (r *tokenResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 }
 
 func (r *tokenResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), strings.TrimSpace(req.ID))...)
+	id, err := validateTokenImportID(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Token Import ID", err.Error())
+		return
+	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 }
 
 func (m *tokenModel) toCreateRequest(ctx context.Context) (client.Token, diag.Diagnostics) {
@@ -194,6 +204,8 @@ func (m *tokenModel) applyAPI(ctx context.Context, token *client.Token, includeG
 	m.Comment = stringValue(token.Comment)
 	if includeGeneratedToken && strings.TrimSpace(token.Token) != "" {
 		m.Token = types.StringValue(strings.TrimSpace(token.Token))
+	} else {
+		m.Token = types.StringNull()
 	}
 	m.Created = stringValue(token.Created)
 	m.LastEdit = stringValue(token.LastEdit)

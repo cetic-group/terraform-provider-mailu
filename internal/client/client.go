@@ -43,6 +43,7 @@ type APIError struct {
 	Code       int
 	Message    string
 	Body       string
+	RetryAfter time.Duration
 }
 
 func (e *APIError) Error() string {
@@ -149,14 +150,14 @@ func (c *Client) do(ctx context.Context, method string, path string, in any, out
 			return nil
 		}
 
-		if !isRetryable(err) || attempt == attempts {
+		if !isRetryable(method, err) || attempt == attempts {
 			return err
 		}
 
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-time.After(time.Duration(attempt) * 200 * time.Millisecond):
+		case <-time.After(retryDelay(err, attempt)):
 		}
 	}
 
@@ -226,6 +227,7 @@ func newAPIError(resp *http.Response, payload []byte) error {
 		StatusCode: resp.StatusCode,
 		Status:     resp.Status,
 		Body:       strings.TrimSpace(string(payload)),
+		RetryAfter: parseRetryAfter(resp.Header.Get("Retry-After"), time.Now()),
 	}
 
 	var response struct {
@@ -240,11 +242,50 @@ func newAPIError(resp *http.Response, payload []byte) error {
 	return apiErr
 }
 
-func isRetryable(err error) bool {
+func isRetryable(method string, err error) bool {
+	if method != http.MethodGet && method != http.MethodDelete && method != http.MethodHead {
+		return false
+	}
+
 	var apiErr *APIError
 	if errors.As(err, &apiErr) {
 		return apiErr.StatusCode == http.StatusTooManyRequests || apiErr.StatusCode >= 500
 	}
 
 	return false
+}
+
+func retryDelay(err error, attempt int) time.Duration {
+	var apiErr *APIError
+	if errors.As(err, &apiErr) && apiErr.RetryAfter > 0 {
+		return apiErr.RetryAfter
+	}
+
+	return time.Duration(attempt) * 200 * time.Millisecond
+}
+
+func parseRetryAfter(value string, now time.Time) time.Duration {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return 0
+	}
+
+	if seconds, err := time.ParseDuration(value + "s"); err == nil {
+		return seconds
+	}
+
+	when, err := http.ParseTime(value)
+	if err != nil {
+		return 0
+	}
+
+	delay := time.Until(when)
+	if !now.IsZero() {
+		delay = when.Sub(now)
+	}
+	if delay < 0 {
+		return 0
+	}
+
+	return delay
 }

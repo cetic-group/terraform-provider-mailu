@@ -2,8 +2,11 @@ package provider
 
 import (
 	"context"
+	"net/url"
+	"strings"
 
 	"github.com/cetic-group/terraform-provider-mailu/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -75,7 +78,11 @@ func (r *relayResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	relay := plan.toRequest()
+	relay, diags := plan.toRequest()
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	if err := r.client.CreateRelay(ctx, relay); err != nil {
 		addClientError(&resp.Diagnostics, "Create Mailu Relay Failed", err)
 		return
@@ -83,7 +90,10 @@ func (r *relayResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	read, err := r.client.GetRelay(ctx, relay.Name)
 	if err != nil {
-		addClientError(&resp.Diagnostics, "Read Mailu Relay After Create Failed", err)
+		plan.ID = types.StringValue(relay.Name)
+		plan.Name = types.StringValue(relay.Name)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		addPartialCreateWarning(&resp.Diagnostics, "Relay", err)
 		return
 	}
 
@@ -119,9 +129,10 @@ func (r *relayResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	update := client.RelayUpdate{
-		SMTP:    plan.SMTP.ValueString(),
-		Comment: plan.Comment.ValueString(),
+	update, diags := plan.toUpdateRequest()
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 	if err := r.client.UpdateRelay(ctx, plan.ID.ValueString(), update); err != nil {
 		addClientError(&resp.Diagnostics, "Update Mailu Relay Failed", err)
@@ -151,17 +162,32 @@ func (r *relayResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 }
 
 func (r *relayResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	id := normalizeDomain(req.ID)
+	id, err := validateDomainImportID(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Relay Import ID", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), id)...)
 }
 
-func (m *relayModel) toRequest() client.Relay {
+func (m *relayModel) toRequest() (client.Relay, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	validateRelaySMTP(m.SMTP.ValueString(), &diags)
 	return client.Relay{
 		Name:    normalizeDomain(m.Name.ValueString()),
 		SMTP:    m.SMTP.ValueString(),
 		Comment: m.Comment.ValueString(),
-	}
+	}, diags
+}
+
+func (m *relayModel) toUpdateRequest() (client.RelayUpdate, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	validateRelaySMTP(m.SMTP.ValueString(), &diags)
+	return client.RelayUpdate{
+		SMTP:    m.SMTP.ValueString(),
+		Comment: m.Comment.ValueString(),
+	}, diags
 }
 
 func (m *relayModel) applyAPI(relay *client.Relay) {
@@ -170,4 +196,23 @@ func (m *relayModel) applyAPI(relay *client.Relay) {
 	m.Name = types.StringValue(name)
 	m.SMTP = stringValue(relay.SMTP)
 	m.Comment = stringValue(relay.Comment)
+}
+
+func validateRelaySMTP(value string, diags *diag.Diagnostics) {
+	raw := strings.TrimSpace(value)
+	if raw == "" {
+		return
+	}
+
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Scheme == "" {
+		return
+	}
+	if parsed.User != nil {
+		diags.AddAttributeError(
+			path.Root("smtp"),
+			"Invalid Mailu Relay SMTP",
+			"`smtp` must not include credentials. Store relay credentials outside Terraform state and configure Mailu with a credential-free relay endpoint.",
+		)
+	}
 }

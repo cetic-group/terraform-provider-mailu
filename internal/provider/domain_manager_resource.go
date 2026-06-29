@@ -87,7 +87,9 @@ func (r *domainManagerResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	if err := r.client.GetDomainManager(ctx, domain, email); err != nil {
-		addClientError(&resp.Diagnostics, "Read Mailu Domain Manager After Create Failed", err)
+		plan.applyIdentity(domain, email)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		addPartialCreateWarning(&resp.Diagnostics, "Domain Manager", err)
 		return
 	}
 
@@ -140,8 +142,17 @@ func (r *domainManagerResource) ImportState(ctx context.Context, req resource.Im
 		return
 	}
 
-	domain = normalizeDomain(domain)
-	email = normalizeEmail(email)
+	var err error
+	domain, err = validateDomainImportID(domain)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Domain Manager Import ID", "Domain part is invalid: "+err.Error())
+		return
+	}
+	email, err = validateEmailImportID(email)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Domain Manager Import ID", "Email part is invalid: "+err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), domainManagerID(domain, email))...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("domain"), domain)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("user_email"), email)...)

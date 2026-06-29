@@ -95,7 +95,10 @@ func (r *aliasResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	read, err := r.client.GetAlias(ctx, alias.Email)
 	if err != nil {
-		addClientError(&resp.Diagnostics, "Read Mailu Alias After Create Failed", err)
+		plan.ID = types.StringValue(alias.Email)
+		plan.Email = types.StringValue(alias.Email)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		addPartialCreateWarning(&resp.Diagnostics, "Alias", err)
 		return
 	}
 
@@ -165,7 +168,11 @@ func (r *aliasResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 }
 
 func (r *aliasResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	id := normalizeEmail(req.ID)
+	id, err := validateEmailImportID(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Alias Import ID", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("email"), id)...)
 }

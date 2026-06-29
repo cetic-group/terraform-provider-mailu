@@ -126,7 +126,10 @@ func (r *domainResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	read, err := r.client.GetDomain(ctx, domain.Name)
 	if err != nil {
-		addClientError(&resp.Diagnostics, "Read Mailu Domain After Create Failed", err)
+		plan.ID = types.StringValue(domain.Name)
+		plan.Name = types.StringValue(domain.Name)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		addPartialCreateWarning(&resp.Diagnostics, "Domain", err)
 		return
 	}
 
@@ -196,7 +199,11 @@ func (r *domainResource) Delete(ctx context.Context, req resource.DeleteRequest,
 }
 
 func (r *domainResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	id := normalizeDomain(req.ID)
+	id, err := validateDomainImportID(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError("Invalid Mailu Domain Import ID", err.Error())
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), id)...)
 }

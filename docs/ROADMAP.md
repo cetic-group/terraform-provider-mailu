@@ -310,7 +310,7 @@ Current result:
 
 ## Phase 9 - Hardening
 
-Status: pending.
+Status: complete for pre-production hardening; production adoption remains Phase 10.
 
 Goal: prepare the provider for production-grade use.
 
@@ -334,6 +334,19 @@ Exit criteria:
 - Provider behavior is stable enough for production mailbox/domain management.
 - Production rollout checklist exists.
 - Known limitations are documented in Terraform provider docs.
+
+Current result:
+
+- HTTP retry handling covers `429` and `5xx` for idempotent methods, respects `Retry-After`, and does not retry authorization, client validation, create, or update failures.
+- Import IDs are validated before being stored for domains, users, aliases, relays, tokens, and domain managers.
+- Create operations store known identity state and emit a warning if Mailu accepts the create but the immediate read-back fails.
+- API diagnostic redaction now covers raw tokens, bearer tokens, passwords, `raw_password`, `reply_body`, token fields, and SMTP URL credentials.
+- `mailu_token.token` is no longer persisted in Terraform state after creation because Terraform state stores sensitive values in clear text.
+- `mailu_relay.smtp` rejects URLs that contain embedded credentials.
+- Unit tests cover rate limits, authorization non-retry behavior, import validation, relay SMTP credential rejection, generated token non-persistence, and redaction.
+- Production rollout checklist and known limitations are documented in `docs/HARDENING.md`.
+- Supply-chain signing, provenance attestations, and GitHub Actions SHA pinning are documented as pre-public-release hardening work once CETIC Group defines the signing policy.
+- Full production migration and operational adoption remain in Phase 10.
 
 ## Phase 10 - Production Adoption
 
