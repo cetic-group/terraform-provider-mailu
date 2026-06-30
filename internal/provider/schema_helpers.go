@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -16,11 +17,12 @@ import (
 // "(known after apply)" on unrelated changes, producing noisy or perpetual
 // diffs.
 
-func optionalComputedString() schema.StringAttribute {
+func optionalComputedString(validators ...validator.String) schema.StringAttribute {
 	return schema.StringAttribute{
 		Optional:      true,
 		Computed:      true,
 		PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+		Validators:    validators,
 	}
 }
 
@@ -32,19 +34,21 @@ func optionalComputedBool() schema.BoolAttribute {
 	}
 }
 
-func optionalComputedInt64() schema.Int64Attribute {
+func optionalComputedInt64(validators ...validator.Int64) schema.Int64Attribute {
 	return schema.Int64Attribute{
 		Optional:      true,
 		Computed:      true,
 		PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()},
+		Validators:    validators,
 	}
 }
 
-func optionalComputedStringSet() schema.SetAttribute {
+func optionalComputedStringSet(validators ...validator.Set) schema.SetAttribute {
 	return schema.SetAttribute{
 		Optional:      true,
 		Computed:      true,
 		ElementType:   types.StringType,
 		PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
+		Validators:    validators,
 	}
 }

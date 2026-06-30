@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -69,6 +69,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{emailValidator()},
 			},
 			"raw_password": schema.StringAttribute{
 				Optional:  true,
@@ -84,15 +85,10 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"enable_pop":           optionalComputedBool(),
 			"allow_spoofing":       optionalComputedBool(),
 			"forward_enabled":      optionalComputedBool(),
-			"forward_destination": schema.SetAttribute{
-				Optional:      true,
-				Computed:      true,
-				ElementType:   types.StringType,
-				PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()},
-			},
-			"forward_keep":  optionalComputedBool(),
-			"reply_enabled": optionalComputedBool(),
-			"reply_subject": optionalComputedString(),
+			"forward_destination":  optionalComputedStringSet(stringSetValidator("email address", isEmailAddress)),
+			"forward_keep":         optionalComputedBool(),
+			"reply_enabled":        optionalComputedBool(),
+			"reply_subject":        optionalComputedString(),
 			"reply_body": schema.StringAttribute{
 				Optional:      true,
 				Computed:      true,
@@ -104,7 +100,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"displayed_name":    optionalComputedString(),
 			"spam_enabled":      optionalComputedBool(),
 			"spam_mark_as_read": optionalComputedBool(),
-			"spam_threshold":    optionalComputedInt64(),
+			"spam_threshold":    optionalComputedInt64(int64Between(0, 100)),
 		},
 	}
 }

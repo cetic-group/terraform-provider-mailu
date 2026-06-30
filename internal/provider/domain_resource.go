@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -60,13 +61,14 @@ func (r *domainResource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{domainValidator()},
 			},
 			"comment":         optionalComputedString(),
 			"max_users":       optionalComputedInt64(),
 			"max_aliases":     optionalComputedInt64(),
 			"max_quota_bytes": optionalComputedInt64(),
 			"signup_enabled":  optionalComputedBool(),
-			"alternatives":    optionalComputedStringSet(),
+			"alternatives":    optionalComputedStringSet(stringSetValidator("domain name", isDomainName)),
 			"managers": schema.SetAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
