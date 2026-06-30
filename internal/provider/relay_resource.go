@@ -51,8 +51,8 @@ func (r *relayResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"smtp":    schema.StringAttribute{Optional: true, Computed: true},
-			"comment": schema.StringAttribute{Optional: true, Computed: true},
+			"smtp":    optionalComputedString(),
+			"comment": optionalComputedString(),
 		},
 	}
 }

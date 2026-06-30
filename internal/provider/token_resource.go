@@ -53,12 +53,8 @@ func (r *tokenResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"comment": schema.StringAttribute{Optional: true, Computed: true},
-			"authorized_ips": schema.SetAttribute{
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
+			"comment":        optionalComputedString(),
+			"authorized_ips": optionalComputedStringSet(),
 			"token": schema.StringAttribute{
 				Computed:            true,
 				Sensitive:           true,
