@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -50,9 +51,10 @@ func (r *relayResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{domainValidator()},
 			},
-			"smtp":    schema.StringAttribute{Optional: true, Computed: true},
-			"comment": schema.StringAttribute{Optional: true, Computed: true},
+			"smtp":    optionalComputedString(),
+			"comment": optionalComputedString(),
 		},
 	}
 }

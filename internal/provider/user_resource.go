@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -68,36 +69,38 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{emailValidator()},
 			},
 			"raw_password": schema.StringAttribute{
 				Optional:  true,
 				Sensitive: true,
 			},
-			"comment":              schema.StringAttribute{Optional: true, Computed: true},
-			"quota_bytes":          schema.Int64Attribute{Optional: true, Computed: true},
+			"comment":              optionalComputedString(),
+			"quota_bytes":          optionalComputedInt64(),
 			"quota_bytes_used":     schema.Int64Attribute{Computed: true},
-			"global_admin":         schema.BoolAttribute{Optional: true, Computed: true},
-			"enabled":              schema.BoolAttribute{Optional: true, Computed: true},
-			"change_pw_next_login": schema.BoolAttribute{Optional: true, Computed: true},
-			"enable_imap":          schema.BoolAttribute{Optional: true, Computed: true},
-			"enable_pop":           schema.BoolAttribute{Optional: true, Computed: true},
-			"allow_spoofing":       schema.BoolAttribute{Optional: true, Computed: true},
-			"forward_enabled":      schema.BoolAttribute{Optional: true, Computed: true},
-			"forward_destination": schema.SetAttribute{
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
+			"global_admin":         optionalComputedBool(),
+			"enabled":              optionalComputedBool(),
+			"change_pw_next_login": optionalComputedBool(),
+			"enable_imap":          optionalComputedBool(),
+			"enable_pop":           optionalComputedBool(),
+			"allow_spoofing":       optionalComputedBool(),
+			"forward_enabled":      optionalComputedBool(),
+			"forward_destination":  optionalComputedStringSet(stringSetValidator("email address", isEmailAddress)),
+			"forward_keep":         optionalComputedBool(),
+			"reply_enabled":        optionalComputedBool(),
+			"reply_subject":        optionalComputedString(),
+			"reply_body": schema.StringAttribute{
+				Optional:      true,
+				Computed:      true,
+				Sensitive:     true,
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
-			"forward_keep":      schema.BoolAttribute{Optional: true, Computed: true},
-			"reply_enabled":     schema.BoolAttribute{Optional: true, Computed: true},
-			"reply_subject":     schema.StringAttribute{Optional: true, Computed: true},
-			"reply_body":        schema.StringAttribute{Optional: true, Computed: true, Sensitive: true},
-			"reply_startdate":   schema.StringAttribute{Optional: true, Computed: true},
-			"reply_enddate":     schema.StringAttribute{Optional: true, Computed: true},
-			"displayed_name":    schema.StringAttribute{Optional: true, Computed: true},
-			"spam_enabled":      schema.BoolAttribute{Optional: true, Computed: true},
-			"spam_mark_as_read": schema.BoolAttribute{Optional: true, Computed: true},
-			"spam_threshold":    schema.Int64Attribute{Optional: true, Computed: true},
+			"reply_startdate":   optionalComputedString(),
+			"reply_enddate":     optionalComputedString(),
+			"displayed_name":    optionalComputedString(),
+			"spam_enabled":      optionalComputedBool(),
+			"spam_mark_as_read": optionalComputedBool(),
+			"spam_threshold":    optionalComputedInt64(int64Between(0, 100)),
 		},
 	}
 }

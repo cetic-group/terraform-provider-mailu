@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -52,17 +53,15 @@ func (r *tokenResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+				Validators: []validator.String{emailValidator()},
 			},
-			"comment": schema.StringAttribute{Optional: true, Computed: true},
-			"authorized_ips": schema.SetAttribute{
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-			},
+			"comment":        optionalComputedString(),
+			"authorized_ips": optionalComputedStringSet(stringSetValidator("IP address or CIDR", isIPOrCIDR)),
 			"token": schema.StringAttribute{
 				Computed:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Generated token value. This provider does not persist generated token values in Terraform state after hardening because Terraform state stores sensitive values in clear text.",
+				PlanModifiers:       []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
+				MarkdownDescription: "Generated token value, returned by Mailu only at creation time and stored in Terraform state as a sensitive value. Protect the state backend: anyone with read access to the state can read this token.",
 			},
 			"created":   schema.StringAttribute{Computed: true},
 			"last_edit": schema.StringAttribute{Computed: true},
@@ -103,11 +102,11 @@ func (r *tokenResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	plan.applyAPI(ctx, created, false, &resp.Diagnostics)
+	plan.applyAPI(ctx, created, true, &resp.Diagnostics)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 	resp.Diagnostics.AddWarning(
-		"Mailu Token Value Not Stored",
-		"Mailu returned a generated token value, but the provider intentionally does not store it in Terraform state. Create tokens through a controlled workflow if the secret value must be captured.",
+		"Mailu Token Value Stored In State",
+		"The generated token value is stored in Terraform state as a sensitive value so it can be consumed by other resources or outputs. Protect the state backend accordingly: anyone with read access to the state can read the token. The value is only returned by Mailu at creation time and cannot be recovered later.",
 	)
 }
 
@@ -202,10 +201,11 @@ func (m *tokenModel) applyAPI(ctx context.Context, token *client.Token, includeG
 	m.ID = types.StringValue(strings.TrimSpace(token.ID.String()))
 	m.Email = types.StringValue(normalizeEmail(token.Email))
 	m.Comment = stringValue(token.Comment)
+	// The Mailu API only returns the generated token value at creation time.
+	// On reads and updates it is absent, so the prior state value is preserved
+	// instead of being wiped.
 	if includeGeneratedToken && strings.TrimSpace(token.Token) != "" {
 		m.Token = types.StringValue(strings.TrimSpace(token.Token))
-	} else {
-		m.Token = types.StringNull()
 	}
 	m.Created = stringValue(token.Created)
 	m.LastEdit = stringValue(token.LastEdit)

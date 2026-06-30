@@ -1,0 +1,56 @@
+name: acceptance
+
+# Acceptance tests provision real objects against a live Mailu instance.
+# They are opt-in: triggered manually, and skipped automatically unless the
+# required secrets are configured. Always point MAILU_ACC_DOMAIN at a
+# disposable domain, never production.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly smoke run; the job no-ops when secrets are absent.
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  testacc:
+    runs-on: ubuntu-24.04
+    environment: acceptance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_wrapper: false
+
+      - name: Check acceptance secrets are present
+        id: guard
+        env:
+          MAILU_ENDPOINT: ${{ secrets.MAILU_ENDPOINT }}
+          MAILU_API_TOKEN: ${{ secrets.MAILU_API_TOKEN }}
+          MAILU_ACC_DOMAIN: ${{ secrets.MAILU_ACC_DOMAIN }}
+        run: |
+          if [ -z "$MAILU_ENDPOINT" ] || [ -z "$MAILU_API_TOKEN" ] || [ -z "$MAILU_ACC_DOMAIN" ]; then
+            echo "Acceptance secrets are not configured; skipping." >&2
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run acceptance tests
+        if: steps.guard.outputs.run == 'true'
+        env:
+          MAILU_ENDPOINT: ${{ secrets.MAILU_ENDPOINT }}
+          MAILU_API_TOKEN: ${{ secrets.MAILU_API_TOKEN }}
+          MAILU_ACC_DOMAIN: ${{ secrets.MAILU_ACC_DOMAIN }}
+        run: make testacc

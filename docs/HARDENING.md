@@ -11,7 +11,7 @@ This guide records the production hardening rules for the Mailu Terraform provid
 - `Retry-After` is parsed for rate limit responses.
 - Import IDs are validated before they are written to Terraform state.
 - Creates store the known resource identity if Mailu accepts the create request but the immediate read-back fails.
-- `mailu_token.token` is not persisted in Terraform state after creation.
+- `mailu_token.token` is stored in Terraform state as a sensitive value (Mailu returns it only at creation time); protect the state backend accordingly.
 - `mailu_relay.smtp` rejects URLs containing embedded credentials.
 
 ## Production Rollout Checklist
@@ -28,7 +28,7 @@ This guide records the production hardening rules for the Mailu Terraform provid
 
 ## Known Limitations
 
-- Terraform state stores sensitive values in clear text unless the backend protects them. The provider avoids persisting generated Mailu token values for this reason.
+- Terraform state stores sensitive values in clear text unless the backend protects them. Generated Mailu token values are stored in state as sensitive values because Mailu only returns them at creation time; protect the state backend accordingly.
 - DNS records are not managed by this provider. Use DNS providers and the `mailu_dkim` data source or domain DNS outputs.
 - `mailu_fetchmail` and `mailu_server_info` are not implemented because Mailu exposes no API endpoints for them in this installation.
 - Mailu object identity is normalized to lowercase for domains and email addresses.

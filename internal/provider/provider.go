@@ -42,7 +42,7 @@ func (p *mailuProvider) Metadata(_ context.Context, _ provider.MetadataRequest, 
 
 func (p *mailuProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage Mailu domains, users, aliases, and related mail objects through the Mailu admin API.\n\nKnown limitations: Terraform state must be protected by the selected backend, generated Mailu token values are not persisted in state, DNS records are managed by DNS providers, and Mailu object identities are normalized to lowercase.",
+		MarkdownDescription: "Manage Mailu domains, users, aliases, and related mail objects through the Mailu admin API.\n\nKnown limitations: Terraform state must be protected by the selected backend, generated Mailu token values are stored in state as sensitive values (anyone with read access to the state can read them), DNS records are managed by DNS providers, and Mailu object identities are normalized to lowercase.",
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
 				Optional:            true,
@@ -170,6 +170,9 @@ func (p *mailuProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewDomainDataSource,
 		NewUserDataSource,
 		NewDKIMDataSource,
+		NewDomainsDataSource,
+		NewUsersDataSource,
+		NewAliasesDataSource,
 	}
 }
 

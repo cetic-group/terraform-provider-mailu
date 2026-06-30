@@ -36,7 +36,7 @@ Before release:
 
 - `go test ./...`
 - `terraform fmt -recursive`
-- Acceptance tests in a controlled Mailu environment.
+- Acceptance tests in a controlled Mailu environment: `make testacc` with `MAILU_ENDPOINT`, `MAILU_API_TOKEN`, and a disposable `MAILU_ACC_DOMAIN` set. They create and destroy real domains, users, and aliases under that domain, and verify create, update/drift, import, and destroy. The `acceptance` GitHub workflow runs them on demand when the matching repository secrets are configured.
 - Documentation examples match implemented schemas.
 - Sensitive values are not present in examples, logs, test fixtures, or docs.
 

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	resourceschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 func TestResourcesAndDataSourcesRegistered(t *testing.T) {
@@ -47,7 +48,14 @@ func TestResourcesAndDataSourcesRegistered(t *testing.T) {
 		dataSourceNames[resp.TypeName] = true
 	}
 
-	for _, name := range []string{"mailu_domain", "mailu_user", "mailu_dkim"} {
+	for _, name := range []string{
+		"mailu_domain",
+		"mailu_user",
+		"mailu_dkim",
+		"mailu_domains",
+		"mailu_users",
+		"mailu_aliases",
+	} {
 		if !dataSourceNames[name] {
 			t.Fatalf("data source %q is not registered", name)
 		}
@@ -151,7 +159,7 @@ func TestRelaySMTPRejectsCredentials(t *testing.T) {
 	}
 }
 
-func TestTokenApplyAPIDoesNotPersistGeneratedToken(t *testing.T) {
+func TestTokenApplyAPIStoresGeneratedTokenOnCreate(t *testing.T) {
 	t.Parallel()
 
 	var model tokenModel
@@ -160,12 +168,31 @@ func TestTokenApplyAPIDoesNotPersistGeneratedToken(t *testing.T) {
 		ID:    client.FlexibleString("42"),
 		Email: "ADMIN@EXAMPLE.COM",
 		Token: "generated-secret",
+	}, true, &diags)
+	if diags.HasError() {
+		t.Fatalf("unexpected diagnostics: %v", diags)
+	}
+	if model.Token.ValueString() != "generated-secret" {
+		t.Fatalf("generated token should be stored on create: %#v", model.Token)
+	}
+}
+
+func TestTokenApplyAPIPreservesStoredTokenOnRead(t *testing.T) {
+	t.Parallel()
+
+	// The Mailu API only returns the token value at creation time; reads and
+	// updates must keep the value already held in state rather than wipe it.
+	model := tokenModel{Token: types.StringValue("previously-generated")}
+	var diags diag.Diagnostics
+	model.applyAPI(context.Background(), &client.Token{
+		ID:    client.FlexibleString("42"),
+		Email: "admin@example.com",
 	}, false, &diags)
 	if diags.HasError() {
 		t.Fatalf("unexpected diagnostics: %v", diags)
 	}
-	if !model.Token.IsNull() {
-		t.Fatalf("generated token should not be stored in state: %#v", model.Token)
+	if model.Token.ValueString() != "previously-generated" {
+		t.Fatalf("read/update must preserve the stored token: %#v", model.Token)
 	}
 }
 
