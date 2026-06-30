@@ -48,7 +48,14 @@ func TestResourcesAndDataSourcesRegistered(t *testing.T) {
 		dataSourceNames[resp.TypeName] = true
 	}
 
-	for _, name := range []string{"mailu_domain", "mailu_user", "mailu_dkim"} {
+	for _, name := range []string{
+		"mailu_domain",
+		"mailu_user",
+		"mailu_dkim",
+		"mailu_domains",
+		"mailu_users",
+		"mailu_aliases",
+	} {
 		if !dataSourceNames[name] {
 			t.Fatalf("data source %q is not registered", name)
 		}

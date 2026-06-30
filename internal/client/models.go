@@ -129,6 +129,15 @@ func (c *Client) CreateDomain(ctx context.Context, domain Domain) error {
 	return c.Post(ctx, "/domain", domain, nil)
 }
 
+func (c *Client) ListDomains(ctx context.Context) ([]Domain, error) {
+	var domains []Domain
+	if err := c.Get(ctx, "/domain", &domains); err != nil {
+		return nil, err
+	}
+
+	return domains, nil
+}
+
 func (c *Client) GetDomain(ctx context.Context, name string) (*Domain, error) {
 	var domain Domain
 	err := c.Get(ctx, "/domain/"+url.PathEscape(name), &domain)
@@ -151,6 +160,15 @@ func (c *Client) CreateUser(ctx context.Context, user User) error {
 	return c.Post(ctx, "/user", user, nil)
 }
 
+func (c *Client) ListUsers(ctx context.Context) ([]User, error) {
+	var users []User
+	if err := c.Get(ctx, "/user", &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (c *Client) GetUser(ctx context.Context, email string) (*User, error) {
 	var user User
 	err := c.Get(ctx, "/user/"+url.PathEscape(email), &user)
@@ -171,6 +189,15 @@ func (c *Client) DeleteUser(ctx context.Context, email string) error {
 
 func (c *Client) CreateAlias(ctx context.Context, alias Alias) error {
 	return c.Post(ctx, "/alias", alias, nil)
+}
+
+func (c *Client) ListAliases(ctx context.Context) ([]Alias, error) {
+	var aliases []Alias
+	if err := c.Get(ctx, "/alias", &aliases); err != nil {
+		return nil, err
+	}
+
+	return aliases, nil
 }
 
 func (c *Client) GetAlias(ctx context.Context, email string) (*Alias, error) {

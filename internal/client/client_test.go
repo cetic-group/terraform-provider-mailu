@@ -269,3 +269,42 @@ func TestTokenIDAcceptsStringOrNumber(t *testing.T) {
 		}
 	}
 }
+
+func TestClientListReturnsCollections(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/api/v1/domain":
+			_, _ = w.Write([]byte(`[{"name":"a.example.com"},{"name":"b.example.com"}]`))
+		case "/api/v1/user":
+			_, _ = w.Write([]byte(`[{"email":"admin@a.example.com"}]`))
+		case "/api/v1/alias":
+			_, _ = w.Write([]byte(`[{"email":"postmaster@a.example.com"}]`))
+		default:
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	c, err := NewWithConfig(Config{Endpoint: server.URL + "/api/v1", Token: "secret-token", MaxRetries: -1})
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+
+	domains, err := c.ListDomains(context.Background())
+	if err != nil || len(domains) != 2 || domains[0].Name != "a.example.com" {
+		t.Fatalf("ListDomains = %+v, err %v", domains, err)
+	}
+
+	users, err := c.ListUsers(context.Background())
+	if err != nil || len(users) != 1 || users[0].Email != "admin@a.example.com" {
+		t.Fatalf("ListUsers = %+v, err %v", users, err)
+	}
+
+	aliases, err := c.ListAliases(context.Background())
+	if err != nil || len(aliases) != 1 || aliases[0].Email != "postmaster@a.example.com" {
+		t.Fatalf("ListAliases = %+v, err %v", aliases, err)
+	}
+}

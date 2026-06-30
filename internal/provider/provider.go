@@ -170,6 +170,9 @@ func (p *mailuProvider) DataSources(_ context.Context) []func() datasource.DataS
 		NewDomainDataSource,
 		NewUserDataSource,
 		NewDKIMDataSource,
+		NewDomainsDataSource,
+		NewUsersDataSource,
+		NewAliasesDataSource,
 	}
 }
 
