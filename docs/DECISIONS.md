@@ -140,9 +140,9 @@ Reason: the provider uses the Terraform Plugin Framework and must advertise prot
 
 ### Generated Token State
 
-Do not persist generated `mailu_token.token` values in Terraform state.
+Persist the generated `mailu_token.token` value in Terraform state as a sensitive attribute.
 
-Reason: Terraform marks sensitive attributes in CLI output, but state still stores sensitive values in clear text unless the backend protects them. Generated Mailu tokens are credentials and must be captured through a controlled secret workflow outside Terraform state.
+Reason: Mailu returns the token value only once, at creation time, and never on subsequent reads. A token that is never surfaced cannot be consumed by other resources or outputs, which makes the resource unusable for its purpose. Storing it as a sensitive value follows the established ecosystem convention (`random_password`, `tls_private_key`, `vault_*`). State still stores sensitive values in clear text unless the backend protects them, so operators must protect the state backend; this trade-off is documented in the provider and resource docs. A future revision may surface the value through Terraform write-only/ephemeral attributes (Terraform >= 1.11) to avoid persistence. Reads and updates preserve the stored value rather than wiping it, since the API does not return it.
 
 ### Relay SMTP Credentials
 
